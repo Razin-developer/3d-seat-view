@@ -1,0 +1,25 @@
+name: Release Extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Zip extension
+        run: zip -r clens.zip . -x "docs/*" "*.git*" ".github/*"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: clens.zip
+          generate_release_notes: true

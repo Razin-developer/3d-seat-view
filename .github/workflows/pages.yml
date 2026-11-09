@@ -1,0 +1,59 @@
+name: Deploy website
+
+on:
+  push:
+    branches: [main]
+  # Releases made by the release workflow don't trigger other workflows,
+  # so redeploy when it finishes to pick up the new version.
+  workflow_run:
+    workflows: ["Release Extension"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p _site
+          cp -R docs/. _site/
+
+          # Same zip as the release workflow, so the site always carries the current build.
+          if [ -f manifest.json ]; then
+            zip -r _site/clens.zip . -x "docs/*" "*.git*" ".github/*" "_site/*"
+          fi
+
+          # Latest release info, baked in so the page works even when the GitHub API is rate-limited.
+          gh api "repos/${{ github.repository }}/releases/latest" \
+            --jq '{tag: .tag_name, url: .html_url, published: .published_at}' \
+            > _site/release.json 2>/dev/null || echo '{}' > _site/release.json
+          cat _site/release.json
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

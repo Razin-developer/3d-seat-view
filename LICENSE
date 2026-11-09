@@ -1,0 +1,38 @@
+3D Seat View for BookMyShow / District
+Copyright (c) 2026 Sunith VS. All rights reserved.
+
+This software, including its source code, design and assets, is the property of
+the copyright holder. The source code is published so people can read and
+review it. Publishing it does not make it open source.
+
+You MAY:
+  - download the extension from the official releases at
+    https://github.com/sunithvs/3d-seat-view/releases and install it for your
+    own personal, non-commercial use;
+  - read and review the source code.
+
+You MAY NOT, without prior written permission from the copyright holder:
+  - copy, modify, merge, publish, distribute, sublicense or sell the software,
+    or any substantial part of it;
+  - publish the extension, or a modified or rebranded version of it, on any
+    extension store, website or other channel;
+  - use the source code, or work derived from it, in another product.
+
+Contributions: by sending a pull request, issue patch or other contribution you
+agree that the copyright holder may use, modify, relicense and distribute it
+as part of this software without restriction.
+
+The copyright holder may change these terms, or stop publishing the source
+code, at any time.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+This project is not affiliated with, endorsed by or connected to BookMyShow or
+District. All trademarks belong to their owners.
+
+For permission requests, open an issue at
+https://github.com/sunithvs/3d-seat-view/issues

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3D Seat View — see your seat before you book</title>
+  <meta name="description" content="Chrome extension that shows a 3D view from the seat you pick on BookMyShow and District, with a seat score, distance to screen, screen fill angle and neck tilt.">
+  <meta property="og:title" content="3D Seat View for BookMyShow / District">
+  <meta property="og:description" content="See the view from your seat before you pay. Free Chrome extension.">
+  <meta name="theme-color" content="#0d0f14">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffb547'/%3E%3Cpath d='M7 11h18l-3 6H10z' fill='%230d0f14'/%3E%3Crect x='9' y='19' width='4' height='5' rx='1' fill='%230d0f14'/%3E%3Crect x='14' y='19' width='4' height='5' rx='1' fill='%230d0f14'/%3E%3Crect x='19' y='19' width='4' height='5' rx='1' fill='%230d0f14'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#top">
+      <span class="logo" aria-hidden="true"></span>
+      3D Seat View
+    </a>
+    <nav class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a class="gh-star" href="https://github.com/sunithvs/3d-seat-view" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
+        <span>Star</span><b class="star-count" hidden></b>
+      </a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Free Chrome extension · BookMyShow &amp; District</p>
+        <h1>See the view from your seat <em>before</em> you pay.</h1>
+        <p class="lede">Pick a seat and a side panel opens next to the seat map with a 3D view from that seat, a score out of 100, and the numbers that matter: distance to the screen, how far off-centre you are, how much of your view the screen fills, and how far you'll tilt your neck.</p>
+        <div class="cta">
+          <a class="btn primary" id="download" href="https://github.com/sunithvs/3d-seat-view/releases/latest/download/clens.zip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Download extension
+          </a>
+          <a class="btn ghost" href="#install">How to install</a>
+        </div>
+        <p class="release-line"><span class="dot"></span><span id="release-text">Latest release</span> · <a id="release-link" href="https://github.com/sunithvs/3d-seat-view/releases/latest" target="_blank" rel="noopener">release notes</a></p>
+      </div>
+
+      <!-- Demo: booking-style seat map with the extension docked on the right -->
+      <div class="browser" aria-label="Demo: seat map with the 3D Seat View panel">
+        <div class="browser-bar">
+          <span class="lights"><i></i><i></i><i></i></span>
+          <span class="url">tickets.example / seat-layout</span>
+          <span class="ext-icon" title="3D Seat View"></span>
+        </div>
+        <div class="browser-body">
+          <div class="booking">
+            <div class="booking-head">
+              <div>
+                <strong>Starfall</strong>
+                <span>Orbit Cinemas: Screen 3 · Today, 7:30 PM</span>
+              </div>
+              <span class="pill">2 Tickets</span>
+            </div>
+            <div class="map" id="map"></div>
+            <div class="screen-bar"><span></span>Screen this way</div>
+            <p class="map-hint">Tap any free seat</p>
+          </div>
+
+          <aside class="panel" aria-live="polite">
+            <div class="panel-head">
+              <span class="logo sm" aria-hidden="true"></span>
+              <b>3D Seat View</b>
+              <span class="close" aria-hidden="true">×</span>
+            </div>
+            <div class="view-wrap">
+              <canvas id="view" width="640" height="400"></canvas>
+              <span class="view-tag" id="view-tag">Seat J5</span>
+            </div>
+            <div class="score-row">
+              <div class="ring" id="ring" style="--p:90">
+                <span id="score">90</span>
+              </div>
+              <div>
+                <div class="seat-name" id="seat-name">J5</div>
+                <div class="verdict" id="verdict">Great seat</div>
+              </div>
+            </div>
+            <dl class="metrics">
+              <div><dt>Distance to screen</dt><dd id="m-dist">–</dd></div>
+              <div><dt>Offset from centre</dt><dd id="m-off">–</dd></div>
+              <div><dt>Screen fill angle</dt><dd id="m-fill">–</dd></div>
+              <div><dt>Neck tilt</dt><dd id="m-tilt">–</dd></div>
+              <div><dt>Row</dt><dd id="m-row">–</dd></div>
+            </dl>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="how">
+      <h2>How it works</h2>
+      <div class="cards">
+        <article>
+          <span class="num">01</span>
+          <h3>Open a seat layout</h3>
+          <p>Go to the seat selection page on BookMyShow or District, the same as always.</p>
+        </article>
+        <article>
+          <span class="num">02</span>
+          <h3>Pick a seat</h3>
+          <p>The side panel opens and rebuilds the hall in 3D from the layout, then puts you in that seat.</p>
+        </article>
+        <article>
+          <span class="num">03</span>
+          <h3>Compare, then book</h3>
+          <p>Each seat gets a score out of 100. Try a few, keep the best one, and book on the site as usual.</p>
+        </article>
+      </div>
+      <div class="explain">
+        <div><b>Distance to screen</b><span>How far your eyes are from the screen.</span></div>
+        <div><b>Offset from centre</b><span>How far left or right of the middle you sit.</span></div>
+        <div><b>Screen fill angle</b><span>How wide the screen looks. Around 40–50° feels immersive without turning your head.</span></div>
+        <div><b>Neck tilt</b><span>How far you look up. Front rows score lower for a reason.</span></div>
+      </div>
+    </section>
+
+    <section class="install" id="install">
+      <h2>How to install</h2>
+      <p class="sub">It isn't on the Chrome Web Store yet, so you load it yourself. It takes about a minute.</p>
+      <ol class="steps">
+        <li><b>Download and unzip.</b> Get <a href="https://github.com/sunithvs/3d-seat-view/releases/latest/download/clens.zip"><code>clens.zip</code></a> and unzip it. You'll get a folder; keep it somewhere it won't be deleted.</li>
+        <li><b>Open the extensions page.</b> Type <code>chrome://extensions</code> in the address bar and press Enter.</li>
+        <li><b>Turn on Developer mode.</b> Switch on the toggle at the top right of the page.</li>
+        <li><b>Click "Load unpacked".</b> The button appears at the top left once Developer mode is on.</li>
+        <li><b>Pick the folder.</b> Choose the unzipped folder (the one with <code>manifest.json</code> inside).</li>
+        <li><b>Pin it.</b> Click the puzzle icon in the toolbar and pin <i>3D Seat View</i> so it's one click away.</li>
+        <li><b>Open BookMyShow or District.</b> Choose a show, go to seat selection, and pick a seat. The 3D view opens in the side panel.</li>
+      </ol>
+      <p class="note">Updating: download the new zip, replace the folder, then click the reload arrow on the extension's card in <code>chrome://extensions</code>. Works in Chrome, Edge, Brave and Arc.</p>
+      <a class="btn primary" href="https://github.com/sunithvs/3d-seat-view/releases/latest/download/clens.zip">Download extension</a>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div>
+      <p>© 2026 Sunith VS. All rights reserved. Free to install and use for personal use; see the <a href="https://github.com/sunithvs/3d-seat-view/blob/main/LICENSE">license</a>.</p>
+      <p class="muted">Not affiliated with BookMyShow or District. The demo above is an illustration, not a real booking page.</p>
+    </div>
+    <div class="foot-links">
+      <a href="https://github.com/sunithvs/3d-seat-view" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/sunithvs/3d-seat-view/releases" target="_blank" rel="noopener">Releases</a>
+      <a href="https://github.com/sunithvs/3d-seat-view/issues" target="_blank" rel="noopener">Report an issue</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
