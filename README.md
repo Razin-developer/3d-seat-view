@@ -5,23 +5,12 @@ See the view from your seat before you pay. Pick a seat on BookMyShow or Distric
 **Website:** https://seats.movie/  
 **Video (1 min):** https://youtu.be/BZO4ZHF7kJk
 **Chrome Web Store:** https://chromewebstore.google.com/detail/flckkbgpbfplbiljniohphhmaogainnl  
-**Download:** [3d-seat-view.zip](https://seats.movie/download/3d-seat-view.zip) · [install guide](https://seats.movie/install.html)
 
 ## Install
 
-Easiest: install from the [Chrome Web Store](https://chromewebstore.google.com/detail/flckkbgpbfplbiljniohphhmaogainnl). To load it by hand instead:
+Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/flckkbgpbfplbiljniohphhmaogainnl) and press **Add to Chrome**. Then open a seat-selection page on BookMyShow or District, click the 3D Seat View icon and pick a seat.
 
-1. Download [`3d-seat-view.zip`](https://seats.movie/download/3d-seat-view.zip) and unzip it. Keep the folder somewhere it won't be deleted.
-2. Open `chrome://extensions` in Chrome.
-3. Turn on **Developer mode** (top right).
-4. Click **Load unpacked** (top left).
-5. Pick the unzipped folder (the one with `manifest.json` inside).
-6. Click the puzzle icon in the toolbar and pin **3D Seat View**.
-7. Open BookMyShow or District, go to seat selection and pick a seat. The 3D view opens in the side panel.
-
-**Updating:** download the new zip, replace the folder, then click the reload arrow on the extension's card in `chrome://extensions`.
-
-Works in Chrome and other Chromium browsers (Edge, Brave, Arc).
+Works in Chrome and other Chromium browsers (Edge, Brave, Arc) on a computer.
 
 ## Releases
 
