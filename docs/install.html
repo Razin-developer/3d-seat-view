@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Install 3D Seat View – download and load in Chrome</title>
+  <meta name="description" content="Install 3D Seat View before it reaches the Chrome Web Store: download the ZIP, unzip it and load it in Chrome in about two minutes.">
+  <meta name="theme-color" content="#1c1c1e">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Microsoft Clarity: website usage analytics (this site only, not the extension) -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "zbbi3nvub4");
+  </script>
+</head>
+<body>
+  <div class="page">
+    <header class="nav">
+      <a class="brand" href="index.html" aria-label="3D Seat View home">
+        <img src="assets/logo.svg" width="30" height="30" alt="">
+        <span>3D Seat View</span>
+      </a>
+      <nav aria-label="Main">
+        <a href="index.html#video">Video</a>
+        <a href="index.html#features">Features</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+      <a class="btn white small" href="index.html">Back to site</a>
+    </header>
+
+    <main class="guide">
+      <section class="guideTop">
+        <p class="label">Install guide</p>
+        <h1>Install it yourself in two minutes</h1>
+        <p class="lead">3D Seat View is on its way to the Chrome Web Store. Until it is listed, you can load the same build by hand. It is free, and Chrome keeps it until you remove it.</p>
+        <div class="actions">
+          <a class="btn lav" href="download/3d-seat-view.zip" download>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+            Download ZIP
+          </a>
+          <span class="meta">Version 1.3.0 · about 200 KB · Chrome, Edge, Brave or Arc on a computer</span>
+        </div>
+      </section>
+
+      <ol class="guideSteps">
+        <li>
+          <b>1</b>
+          <div>
+            <h2>Download and unzip</h2>
+            <p>Download the ZIP above and unzip it. You get a folder named <code>3d-seat-view</code>. Move it somewhere it will stay, such as Documents. Chrome loads the extension from this folder, so do not delete it.</p>
+          </div>
+        </li>
+        <li>
+          <b>2</b>
+          <div>
+            <h2>Open the Extensions page</h2>
+            <p>In Chrome, type this in the address bar and press Enter. Chrome does not allow websites to link to it, so copy it:</p>
+            <div class="copy"><code id="extUrl">chrome://extensions</code><button type="button" data-copy="extUrl">Copy</button></div>
+            <p class="note">In Edge use <code>edge://extensions</code>, in Brave <code>brave://extensions</code>.</p>
+          </div>
+        </li>
+        <li>
+          <b>3</b>
+          <div>
+            <h2>Turn on Developer mode</h2>
+            <p>Use the switch in the top right corner of the Extensions page.</p>
+            <div class="mock" aria-hidden="true"><span>Developer mode</span><i class="toggle"></i></div>
+          </div>
+        </li>
+        <li>
+          <b>4</b>
+          <div>
+            <h2>Load unpacked</h2>
+            <p>Three buttons appear at the top left. Click <strong>Load unpacked</strong> and choose the unzipped folder, the one that has <code>manifest.json</code> inside it.</p>
+            <div class="mock" aria-hidden="true"><i class="pill on">Load unpacked</i><i class="pill">Pack extension</i><i class="pill">Update</i></div>
+          </div>
+        </li>
+        <li>
+          <b>5</b>
+          <div>
+            <h2>Pin it</h2>
+            <p>Click the puzzle icon in the Chrome toolbar and pin <strong>3D Seat View</strong>, so its icon is always visible.</p>
+            <div class="mock" aria-hidden="true"><img src="assets/logo.svg" width="26" height="26" alt=""><span>3D Seat View for BookMyShow &amp; District</span><i class="pin">Pin</i></div>
+          </div>
+        </li>
+        <li>
+          <b>6</b>
+          <div>
+            <h2>Use it</h2>
+            <p>Open a movie on BookMyShow or District and go to seat selection. Click the 3D Seat View icon, then click any seat. If the booking page was already open, reload it once.</p>
+          </div>
+        </li>
+      </ol>
+
+      <section class="guideMore">
+        <div>
+          <h2>Good to know</h2>
+          <details>
+            <summary>Is it safe to load an extension this way?</summary>
+            <p>Loading unpacked is Chrome's built-in way to run an extension from a folder. This is the same build that is submitted to the Chrome Web Store. Nothing in it is hidden or compressed beyond the 3D library, so you can open and read every file in the folder before loading it. It runs only on BookMyShow and District pages. See the <a href="privacy.html">privacy policy</a>.</p>
+          </details>
+          <details>
+            <summary>Chrome shows "Disable developer mode extensions"</summary>
+            <p>Chrome shows this reminder for every extension loaded from a folder. Close it and keep the extension on. It goes away once you install from the Chrome Web Store instead.</p>
+          </details>
+          <details>
+            <summary>"Manifest file is missing or unreadable"</summary>
+            <p>You picked the wrong folder. Choose the folder that directly contains <code>manifest.json</code>. If unzipping made a folder inside a folder, pick the inner one.</p>
+          </details>
+          <details>
+            <summary>The panel says "No seat layout found"</summary>
+            <p>Open a seat-selection page first, then reload that page once so the extension can read it.</p>
+          </details>
+          <details>
+            <summary>How do I update or remove it?</summary>
+            <p>To update: download the new ZIP, replace the folder's contents, then press the reload arrow on the extension's card on the Extensions page. To remove: press Remove on that card and delete the folder. When the Chrome Web Store version is out, remove this one and install from the store to get automatic updates.</p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="index.html"><img src="assets/logo.svg" width="26" height="26" alt=""><span>3D Seat View</span></a>
+      <p>An independent tool, not affiliated with or endorsed by BookMyShow, District, Zomato or any cinema chain.</p>
+      <a href="privacy.html">Privacy policy</a>
+    </footer>
+  </div>
+
+  <script>
+    for (const b of document.querySelectorAll('[data-copy]')) {
+      b.addEventListener('click', async () => {
+        const text = document.getElementById(b.dataset.copy).textContent;
+        try { await navigator.clipboard.writeText(text); b.textContent = 'Copied'; }
+        catch (_) { b.textContent = 'Select and copy'; }
+        setTimeout(() => (b.textContent = 'Copy'), 1600);
+      });
+    }
+  </script>
+</body>
+</html>

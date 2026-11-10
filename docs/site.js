@@ -10,10 +10,14 @@ const DEMO_URL = 'demo/panel.html?theme=dark&art=0&pick=3'
 
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ---- install buttons
-for (const a of document.querySelectorAll('[data-store]')) {
-  if (STORE_URL) { a.href = STORE_URL; a.target = '_blank'; a.rel = 'noopener'; }
-  else if (a.dataset.soon) { a.textContent = a.dataset.soon; a.classList.add('soon'); a.removeAttribute('href'); }
+// ---- install buttons: the store once it is listed, the install guide until then
+if (STORE_URL) {
+  for (const a of document.querySelectorAll('[data-store]')) {
+    a.href = STORE_URL; a.target = '_blank'; a.rel = 'noopener';
+    const label = a.querySelector('span');
+    if (label && a.dataset.storeLabel) label.textContent = a.dataset.storeLabel;
+  }
+  document.querySelector('[data-soon-note]')?.remove();
 }
 
 // ---- starbursts: n-pointed stars drawn from data-burst="points,outer,inner"
