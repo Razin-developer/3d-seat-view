@@ -66,6 +66,13 @@ h1 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em; white
 .tools { top: 12px; right: 12px; display: flex; gap: 6px; }
 .chip { height: 30px; padding: 0 12px; border-radius: 999px; color: #c9ccd6; font-weight: 550; }
 .chip.on { background: #fff; color: #111; }
+/* trailer, warped onto the 3D screen by panel.js (matrix3d) */
+#trailerWrap { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; background: #000; pointer-events: none; overflow: hidden; }
+#trailerWrap[hidden] { display: none; }
+#trailerFrame { width: 100%; height: 100%; border: 0; display: block; }
+#trailerMsg { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 7px 12px; border-radius: 999px; background: rgba(18,19,24,.8); color: #f2f3f7; font-size: 12px; white-space: nowrap; }
+#trailerMsg[hidden] { display: none; }
+#trailerMsg a { color: #ff9db5; margin-left: 6px; }
 .icon { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: #c9ccd6; }
 .seg button:hover:not(.on):not(:disabled), .chip:hover:not(.on), .icon:hover { color: #fff; }
 
@@ -138,3 +145,33 @@ select { display: block; width: 100%; margin-top: 6px; padding: 7px 8px; backgro
 details .ghost { margin: 4px 0 14px; }
 
 footer { margin-top: auto; padding: 14px var(--gutter) 16px; color: var(--dim); font-size: 11px; }
+
+/* ---- pin / share */
+.actions { display: flex; gap: 8px; margin-top: 14px; }
+.ghost.sm { margin-top: 0; flex: 1; padding: 7px 8px; font-size: 12px; }
+.ghost.sm.on { background: var(--text); color: var(--bg); }
+.ghost:disabled { opacity: .45; cursor: default; }
+#shareMsg { margin: 8px 0 0; color: var(--dim); font-size: 12px; }
+
+/* ---- value */
+#valueBox { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--soft); font-size: 12px; line-height: 1.45; }
+#valueBox[hidden] { display: none; }
+#valueBox .vTop { font-weight: 650; font-size: 13px; }
+#valueBox .vTop.great { color: #22a35a; }
+#valueBox .vAlt { margin-top: 6px; color: var(--dim); }
+#valueBox button { margin-left: 6px; padding: 2px 9px; border-radius: 999px; background: var(--bg); font-weight: 600; font-size: 12px; }
+#valueBox button:hover { background: var(--line); }
+
+/* ---- compare */
+#compare { margin-top: 14px; }
+#compare[hidden] { display: none; }
+#compare h2 { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--dim); text-transform: none; }
+#cmpGrid table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+#cmpGrid th, #cmpGrid td { padding: 7px 4px; border-top: 1px solid var(--line); text-align: center; }
+#cmpGrid th:first-child, #cmpGrid td:first-child { text-align: left; color: var(--dim); font-weight: 400; padding-left: 0; }
+#cmpGrid thead th { border-top: 0; }
+#cmpGrid td.best { color: #22a35a; font-weight: 700; }
+#cmpGrid .cmpSeat { padding: 3px 9px; border-radius: 999px; background: var(--soft); font-weight: 650; }
+#cmpGrid .cmpSeat.on { background: var(--text); color: var(--bg); }
+#cmpGrid .cmpX { margin-left: 3px; color: var(--dim); font-size: 14px; }
+#cmpGrid .cmpHint { margin: 6px 0 0; color: var(--dim); }

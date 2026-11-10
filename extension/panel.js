@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.min.js';
-import { DEFAULTS, buildModel, seatMetrics, seatDistance, eyeOf, bestBlock } from './model.js';
+import { DEFAULTS, FORMATS, detectFormat, valueInfo, priceOf, buildModel, seatMetrics, seatDistance, eyeOf, bestBlock } from './model.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -17,12 +17,23 @@ window.addEventListener('unhandledrejection', (e) => report(e.reason));
 const safe = (fn) => (...args) => { try { return fn(...args); } catch (e) { report(e); } };
 const COLORS = { available: 0x2fbf71, best: 0xf5b942, sold: 0x4a4d57, picked: 0xff9db5, selected: 0xff3d6e };
 const CFG_KEY = 'bms3d.cfg';
+const HALL_KEY = 'bms3d.hall';
 
 // ---------------------------------------------------------------- state
 let cfg = { ...DEFAULTS };
 try { cfg = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(CFG_KEY) || '{}') }; } catch (_) { /* defaults */ }
+let hallPick = 'auto'; // 'auto' (from the show name), a FORMATS key, or 'custom' (your own sliders)
+try { hallPick = localStorage.getItem(HALL_KEY) || 'auto'; } catch (_) { /* default */ }
+if (hallPick !== 'auto' && hallPick !== 'custom' && !FORMATS[hallPick]) hallPick = 'auto';
 let layout = null;
 let model = null;
+let pinned = []; // seat ids kept for comparison
+
+function detectedHall() { return detectFormat(`${layout?.title || ''} ${layout?.sub || ''}`); }
+function effCfg() {
+  const key = hallPick === 'auto' ? detectedHall() : hallPick;
+  return FORMATS[key] && key !== 'standard' ? { ...cfg, ...FORMATS[key].cfg } : cfg;
+}
 let selectedId = null;
 let prevId = null;
 let mode = 'hall';
@@ -637,7 +648,8 @@ function applyLook() {
   const g = isGuide();
   guideGroup.visible = g;
   realGroup.visible = !g;
-  screenMesh.material.map = g ? texGuide : texMovie;
+  screenMesh.material.map = trailer.on ? null : g ? texGuide : texMovie;
+  screenMesh.material.color.setHex(trailer.on ? 0x000000 : 0xffffff);
   screenMesh.material.needsUpdate = true;
   $('btnGuide').classList.toggle('on', g);
   $('legend').hidden = !g;
@@ -756,8 +768,99 @@ function frame(t) {
     marker.rotation.y = t / 600;
   }
   renderer.render(scene, camera);
+  placeTrailer();
 }
 requestAnimationFrame(frame);
+
+// ---------------------------------------------------------------- trailer
+// Plays only after the user presses the button. A YouTube player cannot be drawn
+// into WebGL, so a 1920x1080 iframe (so YouTube serves full HD) is laid over the
+// canvas and warped with a CSS perspective matrix onto the screen's projected corners.
+const trailer = { on: false, info: null, started: 0 };
+const TW = 1920, TH = 1080;
+const tCorners = [0, 1, 2, 3].map(() => new THREE.Vector3());
+
+function setTrailer(info) {
+  trailer.info = info && /^[\w-]{11}$/.test(info.id || '') ? info : null;
+  $('btnTrailer').hidden = !trailer.info;
+  if (!trailer.info && trailer.on) stopTrailer();
+}
+
+function startTrailer() {
+  if (!trailer.info || !model) return;
+  trailer.on = true;
+  trailer.started = performance.now();
+  $('trailerMsg').hidden = true;
+  const q = new URLSearchParams({ autoplay: 1, controls: 0, rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3, disablekb: 1, enablejsapi: 1, vq: 'hd1080' });
+  $('trailerFrame').src = `https://www.youtube-nocookie.com/embed/${trailer.info.id}?${q}`;
+  $('btnTrailer').textContent = '■ Stop';
+  $('btnTrailer').classList.add('on');
+  if (selectedId) { pref = 'seat'; setMode('seat'); } else applyLook();
+}
+
+function stopTrailer() {
+  trailer.on = false;
+  $('trailerFrame').src = 'about:blank';
+  $('trailerWrap').hidden = true;
+  $('trailerMsg').hidden = true;
+  $('btnTrailer').textContent = '▶ Trailer';
+  $('btnTrailer').classList.remove('on');
+  applyLook();
+}
+
+// The player reports embed failures (e.g. disabled for this video) by postMessage.
+window.addEventListener('message', (e) => {
+  if (!trailer.on || e.source !== $('trailerFrame').contentWindow) return;
+  let d = e.data;
+  try { if (typeof d === 'string') d = JSON.parse(d); } catch (_) { return; }
+  if (d && d.event === 'onError') {
+    stopTrailer();
+    const m = $('trailerMsg');
+    m.textContent = 'This trailer cannot be played here.';
+    const a = document.createElement('a');
+    a.href = `https://www.youtube.com/watch?v=${trailer.info.id}`; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Open on YouTube';
+    m.append(a);
+    m.hidden = false;
+  }
+});
+
+// unit square -> quad homography (Heckbert), returned as a CSS matrix3d for a TWxTH box
+function quadMatrix(p) {
+  const [p0, p1, p2, p3] = p;
+  const dx1 = p1.x - p2.x, dx2 = p3.x - p2.x, dx3 = p0.x - p1.x + p2.x - p3.x;
+  const dy1 = p1.y - p2.y, dy2 = p3.y - p2.y, dy3 = p0.y - p1.y + p2.y - p3.y;
+  const den = dx1 * dy2 - dx2 * dy1;
+  if (!isFinite(den) || Math.abs(den) < 1e-9) return null;
+  const g = (dx3 * dy2 - dx2 * dy3) / den, h = (dx1 * dy3 - dx3 * dy1) / den;
+  const a = p1.x - p0.x + g * p1.x, b = p3.x - p0.x + h * p3.x, c = p0.x;
+  const d = p1.y - p0.y + g * p1.y, e = p3.y - p0.y + h * p3.y, f = p0.y;
+  return `matrix3d(${a / TW},${d / TW},0,${g / TW},${b / TH},${e / TH},0,${h / TH},0,0,1,0,${c},${f},0,1)`;
+}
+
+function placeTrailer() {
+  const wrap = $('trailerWrap');
+  if (!trailer.on || !model || !screenMesh) { wrap.hidden = true; return; }
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  const { screen } = model;
+  // 16:9 picture centred on the screen, letterboxed or pillarboxed like a real cinema
+  let pw = screen.h * (16 / 9), ph = screen.h;
+  if (pw > screen.w) { pw = screen.w; ph = pw * 9 / 16; }
+  const xs = [-pw / 2, pw / 2, pw / 2, -pw / 2], ys = [ph / 2, ph / 2, -ph / 2, -ph / 2]; // TL, TR, BR, BL
+  camera.updateMatrixWorld();
+  const pts = [];
+  for (let i = 0; i < 4; i++) {
+    tCorners[i].set(xs[i], screen.cy + ys[i], 0).applyMatrix4(camera.matrixWorldInverse);
+    if (tCorners[i].z > -0.05) { wrap.hidden = true; return; } // behind or at the camera
+    tCorners[i].applyMatrix4(camera.projectionMatrix);
+    pts.push({ x: (tCorners[i].x * 0.5 + 0.5) * w, y: (-tCorners[i].y * 0.5 + 0.5) * h });
+  }
+  const m = quadMatrix(pts);
+  if (!m) { wrap.hidden = true; return; }
+  wrap.style.transform = m;
+  wrap.hidden = false;
+}
+
+$('btnTrailer').onclick = () => (trailer.on ? stopTrailer() : startTrailer());
 
 // ---------------------------------------------------------------- pointer input
 const ray = new THREE.Raycaster();
@@ -853,6 +956,7 @@ function renderInfo() {
     $('verdict').textContent = 'Click any seat to sit in it.';
     $('metrics').innerHTML = '';
     renderGroup();
+    renderExtras();
     return;
   }
   const mt = seatMetrics(model, s);
@@ -893,7 +997,178 @@ function renderInfo() {
     $('metrics').append(d);
   }
   renderGroup();
+  renderExtras();
 }
+
+// ---- pin, value, compare
+const rupees = (n) => '\u20B9' + Math.round(n);
+
+function renderExtras() {
+  const s = model?.byId.get(selectedId);
+  const pinBtn = $('btnPin');
+  pinBtn.disabled = !s || s.status === 'sold';
+  const isPinned = !!s && pinned.includes(s.id);
+  pinBtn.classList.toggle('on', isPinned);
+  pinBtn.textContent = isPinned ? '\u2605 In compare' : '\u2606 Add to compare';
+  $('btnShare').disabled = !s;
+  renderValue(s);
+  renderCompare();
+}
+
+function renderValue(s) {
+  const box = $('valueBox');
+  const vi = s && s.status !== 'sold' ? valueInfo(model, s) : null;
+  box.hidden = !vi;
+  box.innerHTML = '';
+  if (!vi) return;
+  const top = document.createElement('div');
+  top.className = 'vTop' + (vi.great ? ' great' : '');
+  const topPct = Math.max(1, Math.round((1 - vi.pct) * 100));
+  top.textContent = vi.great ? `\u2605 Great value: top ${topPct}% for the price` : `Value for money: top ${topPct}%`;
+  box.append(top);
+  if (vi.alt) {
+    const a = vi.alt, label = `${a.seat.row}${a.seat.num}`;
+    const d = document.createElement('div');
+    d.className = 'vAlt';
+    d.append(`Save ${rupees(vi.price - a.price)}: ${label} (${rupees(a.price)}) scores ${a.score}${vi.score - a.score <= 0 ? ', as good or better' : ', ' + (vi.score - a.score) + ' lower'}.`);
+    const b = document.createElement('button');
+    b.textContent = 'View ' + label;
+    b.onclick = () => select(a.seat.id);
+    d.append(b);
+    box.append(d);
+  }
+}
+
+function renderCompare() {
+  const box = $('compare');
+  const seats = pinned.map((id) => model?.byId.get(id)).filter(Boolean);
+  box.hidden = !seats.length;
+  const grid = $('cmpGrid');
+  grid.innerHTML = '';
+  if (!seats.length) return;
+  const data = seats.map((s) => {
+    const mt = seatMetrics(model, s), vi = s.status === 'sold' ? null : valueInfo(model, s);
+    return { s, mt, price: priceOf(s), value: vi ? Math.round(vi.pct * 100) : null };
+  });
+  const rows = [
+    ['Score', (d) => d.mt.score, (d) => String(d.mt.score), 1],
+    ['Price', (d) => d.price || null, (d) => (d.price ? rupees(d.price) : '\u2013'), -1],
+    ['Value', (d) => d.value, (d) => (d.value == null ? '\u2013' : d.value + '%'), 1],
+    ['Distance', (d) => d.mt.dist, (d) => fmt(d.mt.dist) + ' m', 0],
+    ['Screen fills', (d) => d.mt.hAngle, (d) => fmt(d.mt.hAngle, 0) + '\u00B0', 0],
+    ['Neck tilt', (d) => Math.abs(d.mt.lookUp), (d) => fmt(Math.abs(d.mt.lookUp), 0) + '\u00B0', -1],
+  ];
+  const table = document.createElement('table');
+  const head = table.createTHead().insertRow();
+  head.append(document.createElement('th'));
+  for (const d of data) {
+    const th = document.createElement('th');
+    const b = document.createElement('button');
+    b.className = 'cmpSeat' + (d.s.id === selectedId ? ' on' : '');
+    b.textContent = `${d.s.row}${d.s.num}`;
+    b.title = 'Sit here';
+    b.onclick = () => select(d.s.id);
+    const x = document.createElement('button');
+    x.className = 'cmpX'; x.textContent = '\u00D7'; x.title = 'Remove';
+    x.onclick = () => { pinned = pinned.filter((id) => id !== d.s.id); renderInfo(); };
+    th.append(b, x);
+    head.append(th);
+  }
+  const body = table.createTBody();
+  for (const [label, val, show, dir] of rows) {
+    const tr = body.insertRow();
+    tr.insertCell().textContent = label;
+    const vals = data.map(val);
+    const ok = vals.filter((v) => v != null);
+    const best = dir && ok.length > 1 && new Set(ok).size > 1 ? (dir > 0 ? Math.max(...ok) : Math.min(...ok)) : null;
+    data.forEach((d, i) => {
+      const td = tr.insertCell();
+      td.textContent = show(d);
+      if (best != null && vals[i] === best) td.className = 'best';
+    });
+  }
+  grid.append(table);
+  if (seats.length === 1) {
+    const p = document.createElement('p');
+    p.className = 'cmpHint';
+    p.textContent = 'Pick another seat and press Add to compare.';
+    grid.append(p);
+  }
+}
+
+$('btnPin').onclick = () => {
+  if (!selectedId || model.byId.get(selectedId)?.status === 'sold') return;
+  const i = pinned.indexOf(selectedId);
+  if (i >= 0) pinned.splice(i, 1);
+  else { if (pinned.length >= 3) pinned.shift(); pinned.push(selectedId); }
+  renderInfo();
+};
+
+// ---- share: a picture of the view with the numbers on it
+let shareTimer = 0;
+function shareNote(text) {
+  const m = $('shareMsg');
+  m.textContent = text; m.hidden = !text;
+  clearTimeout(shareTimer);
+  if (text) shareTimer = setTimeout(() => { m.hidden = true; }, 5000);
+}
+
+async function shareView() {
+  const s = model?.byId.get(selectedId);
+  if (!s) return;
+  renderer.render(scene, camera); // the canvas is only readable right after a render
+  const shot = await createImageBitmap(canvas);
+  const mt = seatMetrics(model, s);
+  const W = 1200, H = 675;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  const k = Math.max(W / shot.width, H / shot.height);
+  g.drawImage(shot, (W - shot.width * k) / 2, (H - shot.height * k) / 2, shot.width * k, shot.height * k);
+  const grad = g.createLinearGradient(0, H - 250, 0, H);
+  grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,.88)');
+  g.fillStyle = grad; g.fillRect(0, H - 250, W, 250);
+  const font = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+  g.textBaseline = 'alphabetic';
+  g.fillStyle = '#fff'; g.font = `700 54px ${font}`;
+  g.fillText(`Seat ${s.row}${s.num}${s.price ? '  \u00B7  \u20B9' + s.price : ''}`, 48, H - 120);
+  g.font = `500 26px ${font}`; g.fillStyle = 'rgba(255,255,255,.85)';
+  const line1 = [model.title, model.sub].filter(Boolean).join('  \u00B7  ');
+  g.fillText(line1.length > 70 ? line1.slice(0, 69) + '\u2026' : line1, 48, H - 78);
+  g.fillStyle = 'rgba(255,255,255,.7)'; g.font = `500 22px ${font}`;
+  g.fillText(`${mt.verdict}  \u00B7  ${fmt(mt.dist)} m from the screen  \u00B7  screen fills ${fmt(mt.hAngle, 0)}\u00B0`, 48, H - 40);
+  // score ring
+  const cx = W - 110, cy = H - 110, r = 58;
+  const col = mt.score >= 85 ? '#22a35a' : mt.score >= 70 ? '#8bbf3a' : mt.score >= 50 ? '#e5a52a' : '#e5484d';
+  g.lineWidth = 12; g.strokeStyle = 'rgba(255,255,255,.2)'; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
+  g.strokeStyle = col; g.lineCap = 'round'; g.beginPath(); g.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * mt.score / 100); g.stroke();
+  g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = `700 44px ${font}`; g.fillText(String(mt.score), cx, cy + 15);
+  g.textAlign = 'left';
+  // badge
+  g.fillStyle = 'rgba(18,19,24,.7)'; g.beginPath(); g.roundRect(32, 28, 330, 44, 22); g.fill();
+  g.fillStyle = '#fff'; g.font = `600 20px ${font}`; g.fillText('3D Seat View  \u00B7  seats.movie', 52, 57);
+
+  const blob = await new Promise((res) => c.toBlob(res, 'image/png'));
+  const name = `seat-${s.row}${s.num}.png`;
+  const file = new File([blob], name, { type: 'image/png' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: `Seat ${s.row}${s.num}`, text: `My view from ${s.row}${s.num}, scored ${mt.score}/100` });
+      shareNote('Shared.');
+      return;
+    }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    shareNote('Image copied. Paste it into any chat.');
+    return;
+  } catch (_) { /* fall through to a download */ }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  shareNote('Image saved to your downloads.');
+}
+$('btnShare').onclick = () => shareView().catch(report);
 
 // Seats currently selected on the booking page: one chip each, click to sit in it.
 function renderGroup() {
@@ -949,16 +1224,25 @@ function pickBest() {
 }
 
 function syncCalib() {
-  for (const k of ['seatW', 'rowPitch', 'rise', 'firstRow']) $(k).value = cfg[k];
-  $('aspect').value = String(cfg.aspect);
-  $('oSeatW').textContent = `${fmt(cfg.seatW, 2)} m`;
-  $('oRowPitch').textContent = `${fmt(cfg.rowPitch, 2)} m`;
-  $('oRise').textContent = `${fmt(cfg.rise * 100, 0)} cm`;
-  $('oFirstRow').textContent = cfg.firstRow > 0 ? `${fmt(cfg.firstRow, 2)} m` : `auto${model ? ` (${fmt(model.firstRow)} m)` : ''}`;
+  const c = effCfg();
+  for (const k of ['seatW', 'rowPitch', 'rise', 'firstRow']) $(k).value = c[k];
+  $('aspect').value = String(c.aspect);
+  $('oSeatW').textContent = `${fmt(c.seatW, 2)} m`;
+  $('oRowPitch').textContent = `${fmt(c.rowPitch, 2)} m`;
+  $('oRise').textContent = `${fmt(c.rise * 100, 0)} cm`;
+  $('oFirstRow').textContent = c.firstRow > 0 ? `${fmt(c.firstRow, 2)} m` : `auto${model ? ` (${fmt(model.firstRow)} m)` : ''}`;
+  const sel = $('hallType');
+  const det = detectedHall();
+  sel.innerHTML = '';
+  const opts = [['auto', `Auto-detect (${FORMATS[det || 'standard'].label})`], ...Object.entries(FORMATS).map(([k, v]) => [k, v.label])];
+  if (hallPick === 'custom') opts.push(['custom', 'Custom (your sliders)']);
+  for (const [v, t] of opts) { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.append(o); }
+  sel.value = hallPick;
 }
 
 function rebuild() {
-  model = layout ? buildModel(layout, cfg) : null;
+  model = layout ? buildModel(layout, effCfg()) : null;
+  if (model) pinned = pinned.filter((id) => model.byId.has(id));
   const has = !!model;
   $('empty').hidden = has;
   $('info').hidden = !has;
@@ -994,10 +1278,12 @@ function setLayout(l) {
   const key = layout ? layout.url.split('?')[0] : '';
   const fresh = key !== lastKey;
   lastKey = key;
-  if (fresh) { selectedId = prevId = null; pref = 'seat'; want = Math.max(1, layout?.qty || 1); $('pickNote').hidden = true; }
+  if (fresh) { pinned = []; selectedId = prevId = null; pref = 'seat'; want = Math.max(1, layout?.qty || 1); $('pickNote').hidden = true; }
   rebuild();
   if (fresh) { resetCamera(); snap = true; resize(); }
   loadArt(layout?.art).catch(report);
+  if (fresh && trailer.on) stopTrailer();
+  setTrailer(layout?.trailer);
 }
 
 $('btnHall').onclick = () => { pref = 'hall'; setMode('hall'); };
@@ -1009,11 +1295,14 @@ $('btnBest').onclick = pickBest;
 $('qtyMinus').onclick = () => { want = Math.max(1, want - 1); syncQty(); };
 $('qtyPlus').onclick = () => { want = Math.min(10, want + 1); syncQty(); };
 for (const k of ['seatW', 'rowPitch', 'rise', 'firstRow']) {
-  $(k).oninput = (e) => { cfg[k] = Number(e.target.value); saveCfg(); rebuild(); };
+  $(k).oninput = (e) => { cfg = { ...effCfg(), [k]: Number(e.target.value) }; hallPick = 'custom'; saveCfg(); rebuild(); };
 }
-$('aspect').onchange = (e) => { cfg.aspect = Number(e.target.value); saveCfg(); rebuild(); };
-$('btnDefaults').onclick = () => { cfg = { ...DEFAULTS }; saveCfg(); rebuild(); };
-function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (_) { /* private mode */ } }
+$('aspect').onchange = (e) => { cfg = { ...effCfg(), aspect: Number(e.target.value) }; hallPick = 'custom'; saveCfg(); rebuild(); };
+$('hallType').onchange = (e) => { hallPick = e.target.value; saveCfg(); rebuild(); };
+$('btnDefaults').onclick = () => { cfg = { ...DEFAULTS }; hallPick = 'auto'; saveCfg(); rebuild(); };
+function saveCfg() {
+  try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); localStorage.setItem(HALL_KEY, hallPick); } catch (_) { /* private mode */ }
+}
 
 // ---------------------------------------------------------------- data source
 const inExtension = typeof chrome !== 'undefined' && !!chrome.runtime?.id;

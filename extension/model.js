@@ -206,3 +206,57 @@ export function bestBlock(model, n = 1) {
   }
   return best;
 }
+
+// ---- hall types: typical geometry for the common formats; picked from the show's name, or by hand
+export const FORMATS = {
+  standard: { label: 'Standard multiplex', cfg: {} },
+  imax: { label: 'IMAX', cfg: { aspect: 1.43, screenFrac: 0.98, rowPitch: 1.1, rise: 0.34 } },
+  premium: { label: 'Premium large format', cfg: { screenFrac: 0.92, rowPitch: 1.1, rise: 0.32 } },
+  recliner: { label: 'Recliner / Luxe', cfg: { seatW: 0.95, rowPitch: 1.45, rise: 0.35 } },
+  fourdx: { label: '4DX / motion seats', cfg: { aspect: 1.85, seatW: 0.6, rowPitch: 1.15, rise: 0.36 } },
+  single: { label: 'Single screen', cfg: { aspect: 1.85, seatW: 0.52, rowPitch: 0.95, rise: 0.2, screenFrac: 0.8 } },
+};
+
+export function detectFormat(text) {
+  const t = String(text || '').toLowerCase();
+  if (/\bimax\b/.test(t)) return 'imax';
+  if (/\b4dx\b/.test(t)) return 'fourdx';
+  if (/recliner|luxe|insignia|director'?s cut|maison|lounge|gold class|\bgold\b/.test(t)) return 'recliner';
+  if (/\b(pxl|plf|epiq|onyx|icon|xtreme|big ?screen)\b/.test(t)) return 'premium';
+  return '';
+}
+
+// ---- value: how good a seat is for its price
+export const priceOf = (s) => {
+  const n = parseFloat(String(s.price || '').replace(/[^\d.]/g, ''));
+  return n > 0 ? n : 0;
+};
+
+export function scoreOf(model, seat) {
+  const c = model._sc || (model._sc = new Map());
+  let v = c.get(seat.id);
+  if (v === undefined) { v = seatMetrics(model, seat).score; c.set(seat.id, v); }
+  return v;
+}
+
+// pct: share of bookable seats this one beats on score per rupee.
+// alt: the cheapest bookable seat that scores within 6 points of it, if it saves at least 10%.
+export function valueInfo(model, seat) {
+  const price = priceOf(seat);
+  if (!price) return null;
+  const sc = scoreOf(model, seat);
+  const open = model.seats.filter((s) => s.status !== 'sold' && priceOf(s) > 0);
+  if (!open.length) return null;
+  const ratio = (s) => scoreOf(model, s) / priceOf(s);
+  const r = ratio(seat);
+  const better = open.filter((s) => ratio(s) > r + 1e-9).length;
+  const pct = 1 - better / open.length;
+  let alt = null;
+  for (const s of open) {
+    if (s.id === seat.id) continue;
+    const p = priceOf(s), s2 = scoreOf(model, s);
+    if (p > price * 0.9 || s2 < sc - 6) continue;
+    if (!alt || p < alt.price || (p === alt.price && s2 > alt.score)) alt = { seat: s, price: p, score: s2 };
+  }
+  return { price, score: sc, pct, great: pct >= 0.85 && sc >= 70, alt };
+}

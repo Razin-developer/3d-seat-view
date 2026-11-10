@@ -96,6 +96,18 @@
       return code ? [`https://in.bmscdn.com/events/mobile/${code}.jpg`, `https://in.bmscdn.com/events/moviecard/${code}.jpg`] : [];
     },
 
+    // The movie's own page carries its trailer in JSON-LD (a YouTube watch URL).
+    async trailer() {
+      const code = bms.artKey().toUpperCase();
+      if (!code) return null;
+      const res = await fetch('/movies/x/' + code, { credentials: 'omit' });
+      if (!res.ok) return null;
+      const html = await res.text();
+      const m = html.match(/"embedUrl":"https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})/);
+      const n = html.match(/"trailer":\{[^}]*?"name":"([^"]+)"/);
+      return m ? { id: m[1], label: n ? n[1] : '' } : null;
+    },
+
     click(stage, id) {
       const g = stage.findOne((n) => bms.isSeat(n) && bms.idOf(n) === id);
       if (!g) return false;
@@ -251,6 +263,33 @@
       return [];
     },
 
+    // The movie page lists its videos as schema.org VideoObjects ("trailer"); the first
+    // one is the official trailer. The page is large, so read only until it shows up.
+    async trailer(title) {
+      const id = district.artKey();
+      const slug = String(title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      if (!id || !slug) return null;
+      const res = await fetch(`/movies/${slug}-movie-tickets-in-gurgaon-MV${id}`, { credentials: 'omit' });
+      if (!res.ok || !res.body) return null;
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      const re = /\\?"trailer\\?":\{[^}]{0,2500}?watch\?v=([\w-]{11})/;
+      let html = '';
+      try {
+        while (html.length < 2500000) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          html += dec.decode(value, { stream: true });
+          const m = html.match(re);
+          if (m) {
+            const nm = (m[0].match(/\\?"name\\?":\\?"([^"\\]+)/) || [])[1];
+            return { id: m[1], label: nm || 'Trailer' };
+          }
+        }
+      } finally { reader.cancel().catch(() => {}); }
+      return null;
+    },
+
     click(_wrap, id) {
       const el = district.cells.get(id)?.firstElementChild;
       if (!el) return false;
@@ -259,7 +298,106 @@
     },
   };
 
-  const adapters = [bms, district];
+  // ------------------------------------------------------------ PVR INOX
+  // Plain DOM again: a table-like grid. Rows are .seats-row (row letter in .seat-row-no),
+  // every seat is a span in a .seats-col cell. Sold seats are .seat-disable, a chosen seat is
+  // .seat-selected-pvr (or -inox), free ones .seat-current-pvr (or -inox). Category headings
+  // (.seat-category-heading, with the price) sit between the rows they apply to. The screen
+  // is drawn ABOVE the first row.
+  const pvr = {
+    name: 'pvr',
+    groupPick: false,
+    seatEls: new Map(), // seat id -> span
+    find() {
+      if (!/(^|\.)pvrcinemas\.com$/.test(location.hostname)) return null;
+      const w = document.querySelector('.all-seats');
+      return w && w.querySelector('.seats-row .seat-row-no') ? w : null;
+    },
+
+    extract(wrap) {
+      const w = wrap.getBoundingClientRect();
+      const seats = [], headers = [];
+      pvr.seatEls = new Map();
+      let price = '';
+      for (const el of wrap.querySelectorAll('.seat-category-heading, .seats-row')) {
+        if (el.classList.contains('seat-category-heading')) {
+          const p = el.querySelector('.seat-category-price');
+          const n = p ? parseFloat((p.textContent.match(/[\d.]+/) || [])[0]) : 0;
+          price = n > 0 ? String(Math.round(n)) : '';
+          const r = el.getBoundingClientRect();
+          if (r.height > 4) headers.push({ y: Math.round(r.top - w.top), h: Math.round(r.height) });
+          continue;
+        }
+        const label = (el.querySelector('.seat-row-no')?.textContent || '').trim();
+        if (!label) continue;
+        for (const cell of el.querySelectorAll('.seats-col')) {
+          const span = cell.firstElementChild;
+          if (!span) continue;
+          const cls = String(span.className);
+          const sold = /seat-disable/.test(cls), picked = /seat-selected-/.test(cls);
+          if (!sold && !picked && !/seat-current-/.test(cls)) continue; // row letters and aisle gaps
+          const num = span.textContent.trim();
+          const r = cell.getBoundingClientRect();
+          const id = `${label}:${num}`;
+          pvr.seatEls.set(id, span);
+          seats.push({
+            id, row: label, num,
+            x: Math.round(r.left - w.left + r.width / 2),
+            y: Math.round(r.top - w.top + r.height / 2),
+            st: picked ? 9 : sold ? 2 : 1,
+            price,
+          });
+        }
+      }
+      if (!seats.length) return null;
+
+      const xs = seats.map((q) => q.x), ys = seats.map((q) => q.y);
+      let screen = null;
+      const img = document.querySelector('.screen img');
+      if (img) {
+        const r = img.getBoundingClientRect();
+        if (r.width) screen = { x: r.left - w.left + r.width / 2, y: r.top - w.top + r.height / 2, w: r.width };
+      }
+      // the screen is above the rows; if its picture has not loaded, say so by position alone
+      if (!screen) screen = { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: Math.min(...ys) - 80, w: Math.max(...xs) - Math.min(...xs) };
+
+      const t = (document.querySelector('.summary-movies-content h5') || document.querySelector('.movie-info-showed-mobile'))?.textContent.trim() || '';
+      const title = t && t === t.toUpperCase() ? t.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase()) : t;
+      const ps = [...document.querySelectorAll('.summary-movies-content p')].map((p) => p.textContent.trim()).filter(Boolean);
+      const sub = [ps[1], ps[0]].filter(Boolean).join(' | ');
+      const qty = seats.filter((q) => q.st === 9).length || 1;
+      return { seats, headers, screen, qty, qtyFixed: false, title, sub };
+    },
+
+    hook() {
+      if (pvr.hooked) return;
+      pvr.hooked = true;
+      document.addEventListener('click', (e) => {
+        if (quiet) return;
+        const sp = e.target.closest && e.target.closest('.seats-row .seats-col > span');
+        if (!sp || !/seat-(current|selected)-/.test(sp.className)) return;
+        const label = (sp.closest('.seats-row').querySelector('.seat-row-no')?.textContent || '').trim();
+        if (label) post('seat', { id: `${label}:${sp.textContent.trim()}` });
+      }, true);
+    },
+
+    // The booking summary already shows the poster.
+    artKey: () => (document.querySelector('.summary-movies-content h5')?.textContent || '').trim(),
+    async art() {
+      const img = document.querySelector('.summary-movies-photo img');
+      return img && img.src ? [img.src] : [];
+    },
+    async trailer() { return null; }, // the seat page carries no trailer
+
+    click(_wrap, id) {
+      const el = pvr.seatEls.get(id);
+      if (!el) return false;
+      el.click();
+      return true;
+    },
+  };
+
+  const adapters = [bms, district, pvr];
 
   function current() {
     for (const a of adapters) {
@@ -276,7 +414,7 @@
     const layout = cur.a.extract(cur.ctx);
     if (!layout) return null;
     const lines = pageLines();
-    return { ...cur, layout: { url: location.href, site: cur.a.name, ...lines, ...layout, art: artFor(cur.a, lines.title) } };
+    return { ...cur, layout: { url: location.href, site: cur.a.name, ...lines, ...layout, art: artFor(cur.a, lines.title), trailer: trailerFor(cur.a, lines.title) } };
   }
 
   // Artwork URLs are looked up once per movie; the layout is re-sent when they arrive.
@@ -290,6 +428,19 @@
       }).catch(() => {});
     }
     return artCache.get(key);
+  }
+
+  // Same idea for the trailer: looked up once per movie, nothing is played until the panel asks.
+  const trailerCache = new Map();
+  function trailerFor(a, title) {
+    const key = a.name + ':' + a.artKey();
+    if (!trailerCache.has(key)) {
+      trailerCache.set(key, null);
+      a.trailer(title).then((t) => {
+        if (t) { trailerCache.set(key, t); tick(true); }
+      }).catch(() => {});
+    }
+    return trailerCache.get(key);
   }
 
   let lastSig = '';

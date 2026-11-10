@@ -1,17 +1,21 @@
 {
   "manifest_version": 3,
   "name": "3D Seat View for BookMyShow & District",
-  "version": "1.3.0",
+  "version": "1.6.0",
   "description": "3D movie seat preview: see the view from your seat and find the best cinema seats before booking on BookMyShow or District.",
   "minimum_chrome_version": "116",
   "permissions": [
-    "sidePanel"
+    "sidePanel",
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "https://in.bookmyshow.com/*",
     "https://www.district.in/*",
     "https://in.bmscdn.com/*",
-    "https://b.zmtcdn.com/*"
+    "https://b.zmtcdn.com/*",
+    "https://www.youtube-nocookie.com/*",
+    "https://www.youtube.com/*",
+    "https://*.pvrcinemas.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -31,7 +35,8 @@
     {
       "matches": [
         "https://in.bookmyshow.com/*",
-        "https://www.district.in/*"
+        "https://www.district.in/*",
+        "https://www.pvrcinemas.com/*"
       ],
       "js": [
         "inject.js"
@@ -42,7 +47,8 @@
     {
       "matches": [
         "https://in.bookmyshow.com/*",
-        "https://www.district.in/*"
+        "https://www.district.in/*",
+        "https://www.pvrcinemas.com/*"
       ],
       "js": [
         "bridge.js"
