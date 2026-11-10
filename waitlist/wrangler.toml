@@ -1,0 +1,9 @@
+name = "seatview-waitlist"
+main = "src/worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "seatview-waitlist"
+database_id = "8fef7c02-3899-4412-be3a-8ca0b2e30e20"

@@ -3,6 +3,9 @@ import layout from './demo/fixture.js';
 // Paste the Chrome Web Store listing address here once the extension is published.
 const STORE_URL = '';
 
+// Waitlist API (Cloudflare Worker + D1, see /waitlist in the project).
+const WAITLIST_API = 'https://seatview-waitlist.sunithvs2002.workers.dev';
+
 // Live demo: the real extension panel running on sample data, with a neutral screen.
 const DEMO_URL = 'demo/panel.html?theme=dark&art=0&pick=3'
   + '&title=' + encodeURIComponent('Friday Premiere (3D)')
@@ -179,4 +182,30 @@ if (mapSvg && heroFrame && matchMedia('(min-width: 921px)').matches) {
   const start = () => { heroFrame.src = DEMO_URL; setInterval(paint, 500); };
   if (document.readyState === 'complete') setTimeout(start, 600);
   else addEventListener('load', () => setTimeout(start, 600));
+}
+
+// ---- mobile waitlist
+const wl = document.getElementById('waitlist');
+if (wl) {
+  const msg = document.getElementById('wlMsg'), input = document.getElementById('wlEmail'), btn = wl.querySelector('button');
+  const say = (text, kind) => { msg.textContent = text; msg.dataset.kind = kind || ''; };
+  input.addEventListener('input', () => say(''));
+  wl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = input.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { say('Enter a valid email address.', 'err'); input.focus(); return; }
+    btn.disabled = true; say('Adding you…');
+    try {
+      const res = await fetch(WAITLIST_API + '/join', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, platform: wl.platform.value || '', website: wl.website.value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Something went wrong. Try again.');
+      wl.classList.add('done');
+      say('You are on the list. We will email you once when the mobile version is ready.', 'ok');
+    } catch (err) {
+      say(err instanceof TypeError ? 'Could not reach the server. Check your connection and try again.' : err.message, 'err');
+    } finally { btn.disabled = false; }
+  });
 }

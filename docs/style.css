@@ -246,6 +246,31 @@ code { font: 500 .92em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 .guideMore { max-width: 860px; padding: clamp(40px, 6vw, 72px) 0 24px; }
 .guideMore h2 { margin-bottom: 18px; }
 
+/* ---- mobile waitlist */
+.mobile { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 72px); align-items: center; padding: clamp(64px, 9vw, 110px) var(--pad) 0; }
+.wait { background: var(--ink-2); border: 1px solid var(--line); border-radius: 24px; padding: clamp(20px, 3vw, 32px); }
+.waitRow { display: flex; gap: 10px; flex-wrap: wrap; }
+.wait input[type=email] { flex: 1; min-width: 200px; font: inherit; color: #fff; background: var(--ink); border: 1px solid var(--line); border-radius: 9px; padding: 13px 16px; }
+.wait input[type=email]::placeholder { color: #77777f; }
+.wait .btn { border: 0; }
+.wait .btn:disabled { opacity: .6; cursor: default; transform: none; }
+.plat { border: 0; margin: 18px 0 0; padding: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.plat legend { float: left; margin-right: 4px; padding: 0; color: var(--dim); font-size: 14px; font-weight: 300; }
+.plat label { cursor: pointer; }
+.plat input { position: absolute; opacity: 0; pointer-events: none; }
+.plat span { display: block; padding: 7px 16px; border-radius: 999px; border: 1px solid var(--line); font-size: 14px; color: var(--dim); transition: background .2s, color .2s, border-color .2s; }
+.plat input:checked + span { background: #fff; border-color: #fff; color: var(--paper-ink); }
+.plat input:focus-visible + span { outline: 2px solid var(--lav); outline-offset: 3px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.waitMsg { min-height: 1.5em; margin-top: 16px; font-size: 14px; color: var(--dim); }
+.waitMsg[data-kind=err] { color: #ff8f8f; }
+.waitMsg[data-kind=ok] { color: #8fe3b0; }
+.wait.done .waitRow, .wait.done .plat { display: none; }
+.wait.done .waitMsg { margin-top: 0; font-size: 17px; }
+.waitFine { margin-top: 8px; font-size: 13px; font-weight: 300; color: var(--dim); }
+.waitFine a, .faq details a { color: var(--lav); }
+
 /* ---- faq + footer */
 .faq { display: grid; grid-template-columns: .8fr 1.2fr; gap: 40px; padding: clamp(64px, 9vw, 110px) var(--pad) clamp(40px, 6vw, 72px); }
 details { border-top: 1px solid var(--line); }
@@ -305,7 +330,7 @@ dialog p { color: var(--dim); font-size: 13px; font-weight: 300; margin: 0; text
   .slab { width: 100%; }
   .heroArt .main { right: 50%; width: min(236px, 60%); top: 60px; }
   .chip.c1 { left: -2%; } .chip.c2 { left: auto; right: -2%; } .chip.c3 { left: 14%; }
-  .about, .faq { grid-template-columns: 1fr; }
+  .about, .faq, .mobile { grid-template-columns: 1fr; }
   .play { right: 2%; top: -5%; }
   .track article { grid-template-columns: 1fr; }
   .ui { justify-content: flex-start; }
