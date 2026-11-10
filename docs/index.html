@@ -3,157 +3,289 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>3D Seat View — see your seat before you book</title>
-  <meta name="description" content="Chrome extension that shows a 3D view from the seat you pick on BookMyShow and District, with a seat score, distance to screen, screen fill angle and neck tilt.">
-  <meta property="og:title" content="3D Seat View for BookMyShow / District">
-  <meta property="og:description" content="See the view from your seat before you pay. Free Chrome extension.">
-  <meta name="theme-color" content="#0d0f14">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffb547'/%3E%3Cpath d='M7 11h18l-3 6H10z' fill='%230d0f14'/%3E%3Crect x='9' y='19' width='4' height='5' rx='1' fill='%230d0f14'/%3E%3Crect x='14' y='19' width='4' height='5' rx='1' fill='%230d0f14'/%3E%3Crect x='19' y='19' width='4' height='5' rx='1' fill='%230d0f14'/%3E%3C/svg%3E">
+  <title>3D Seat View – See your movie seat in 3D before you book</title>
+  <meta name="description" content="Free Chrome extension. 3D movie seat preview: see the view from your seat, distance to the screen and the best cinema seats before booking on BookMyShow or District.">
+  <meta property="og:title" content="3D Seat View – See your seat before you book">
+  <meta property="og:description" content="A 3D cinema hall beside your booking page. See the view from any seat and find the best seats together.">
+  <meta property="og:image" content="http://seats.radr.in/assets/og.png">
+  <meta property="og:url" content="http://seats.radr.in/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#1c1c1e">
+  <link rel="icon" href="assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <noscript><style>.line > span, .fade, .chip, .pill i { transform: none !important; opacity: 1 !important; } .pill i { width: 52px !important; } .slab { clip-path: none !important; } .heroArt .main { opacity: 1 !important; transform: translate(50%, 0) !important; } .trio .device { transform: none !important; }</style></noscript>
 </head>
 <body>
-  <header class="nav">
-    <a class="brand" href="#top">
-      <span class="logo" aria-hidden="true"></span>
-      3D Seat View
-    </a>
-    <nav class="nav-links">
-      <a href="#how">How it works</a>
-      <a href="#install">Install</a>
-      <a class="gh-star" href="https://github.com/sunithvs/3d-seat-view" target="_blank" rel="noopener">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
-        <span>Star</span><b class="star-count" hidden></b>
+  <!-- When the extension is live, paste its Chrome Web Store address into STORE_URL in site.js. -->
+
+  <div class="page" id="top">
+    <svg class="curves" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M-40 520 C 260 380, 520 300, 1240 90"/>
+      <path d="M-40 640 C 340 470, 700 420, 1240 250"/>
+      <path d="M200 -20 C 420 240, 760 420, 1240 520"/>
+    </svg>
+
+    <header class="nav">
+      <a class="brand" href="#top" aria-label="3D Seat View home">
+        <img src="assets/logo.svg" width="30" height="30" alt="">
+        <span>3D Seat View</span>
       </a>
-    </nav>
-  </header>
+      <nav aria-label="Main">
+        <a href="#about">About</a>
+        <a href="#video">Video</a>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#faq">FAQ</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+      <a class="btn white small" href="#get" data-store>Get it free</a>
+    </header>
 
-  <main id="top">
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Free Chrome extension · BookMyShow &amp; District</p>
-        <h1>See the view from your seat <em>before</em> you pay.</h1>
-        <p class="lede">Pick a seat and a side panel opens next to the seat map with a 3D view from that seat, a score out of 100, and the numbers that matter: distance to the screen, how far off-centre you are, how much of your view the screen fills, and how far you'll tilt your neck.</p>
-        <div class="cta">
-          <a class="btn primary" id="download" href="https://github.com/sunithvs/3d-seat-view/releases/latest/download/clens.zip">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Download extension
+    <section class="hero reveal">
+      <div class="heroText">
+        <h1>
+          <span class="line"><span>See the screen</span></span>
+          <span class="line"><span>from your seat,</span></span>
+          <span class="line"><span>before you book</span></span>
+        </h1>
+        <p class="lead fade">A free Chrome extension that turns the flat seat map on BookMyShow and District into a 3D cinema hall. Click a seat and you are sitting in it.</p>
+        <div class="actions fade">
+          <a class="btn white" href="#get" data-store>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4"/><path d="M12 8.6h8.3M9 13.7 4.9 6.6M15 13.7l-4.1 7.2"/></svg>
+            Add to Chrome
           </a>
-          <a class="btn ghost" href="#install">How to install</a>
+          <button class="btn outline" type="button" data-demo>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>
+            Try live demo
+          </button>
         </div>
-        <p class="release-line"><span class="dot"></span><span id="release-text">Latest release</span> · <a id="release-link" href="https://github.com/sunithvs/3d-seat-view/releases/latest" target="_blank" rel="noopener">release notes</a></p>
-      </div>
-
-      <!-- Demo: booking-style seat map with the extension docked on the right -->
-      <div class="browser" aria-label="Demo: seat map with the 3D Seat View panel">
-        <div class="browser-bar">
-          <span class="lights"><i></i><i></i><i></i></span>
-          <span class="url">tickets.example / seat-layout</span>
-          <span class="ext-icon" title="3D Seat View"></span>
-        </div>
-        <div class="browser-body">
-          <div class="booking">
-            <div class="booking-head">
-              <div>
-                <strong>Starfall</strong>
-                <span>Orbit Cinemas: Screen 3 · Today, 7:30 PM</span>
-              </div>
-              <span class="pill">2 Tickets</span>
-            </div>
-            <div class="map" id="map"></div>
-            <div class="screen-bar"><span></span>Screen this way</div>
-            <p class="map-hint">Tap any free seat</p>
+        <div class="stat fade">
+          <div>
+            <b><span data-count="99">0</span><small>/100</small></b>
+            <span>score of the best<br>seat in this hall</span>
           </div>
+          <a class="pill" href="#features" aria-label="See features">
+            <i>H8</i><i>H9</i><i>H10</i>
+            <span class="go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
+        </div>
+      </div>
 
-          <aside class="panel" aria-live="polite">
-            <div class="panel-head">
-              <span class="logo sm" aria-hidden="true"></span>
-              <b>3D Seat View</b>
-              <span class="close" aria-hidden="true">×</span>
+      <!-- desktop: a working mini product. Click a seat on the map, the real 3D panel follows. -->
+      <div class="demoWrap">
+        <div class="slab" aria-hidden="true">
+          <svg class="burst" data-burst="18,100,46" viewBox="-110 -110 220 220"></svg>
+        </div>
+        <div class="browser">
+          <div class="bar" aria-hidden="true">
+            <i></i><i></i><i></i>
+            <span>booking site &middot; seat layout</span>
+            <b><img src="assets/logo.svg" width="16" height="16" alt=""></b>
+          </div>
+          <div class="split">
+            <div class="map">
+              <p class="mapTitle">Select seats <small>Friday Premiere (3D)</small></p>
+              <svg id="seatMap" role="group" aria-label="Seat map. Click a seat to see the view from it."></svg>
+              <p class="hint"><span></span>Click any seat</p>
+              <ul class="legend" aria-hidden="true">
+                <li><i class="a"></i>Available</li><li><i class="s"></i>Sold</li><li><i class="p"></i>Your seats</li>
+              </ul>
             </div>
-            <div class="view-wrap">
-              <canvas id="view" width="640" height="400"></canvas>
-              <span class="view-tag" id="view-tag">Seat J5</span>
+            <div class="side">
+              <img src="assets/shot-seat.jpg" width="640" height="1280" alt="3D view from seat H9 with a score of 99">
+              <iframe id="heroDemo" title="3D Seat View live panel"></iframe>
             </div>
-            <div class="score-row">
-              <div class="ring" id="ring" style="--p:90">
-                <span id="score">90</span>
-              </div>
-              <div>
-                <div class="seat-name" id="seat-name">J5</div>
-                <div class="verdict" id="verdict">Great seat</div>
-              </div>
-            </div>
-            <dl class="metrics">
-              <div><dt>Distance to screen</dt><dd id="m-dist">–</dd></div>
-              <div><dt>Offset from centre</dt><dd id="m-off">–</dd></div>
-              <div><dt>Screen fill angle</dt><dd id="m-fill">–</dd></div>
-              <div><dt>Neck tilt</dt><dd id="m-tilt">–</dd></div>
-              <div><dt>Row</dt><dd id="m-row">–</dd></div>
-            </dl>
-          </aside>
+          </div>
+        </div>
+      </div>
+
+      <div class="heroArt mobileArt" aria-hidden="true">
+        <div class="slab">
+          <svg class="burst" data-burst="18,100,46" viewBox="-110 -110 220 220"></svg>
+          <svg class="burst tiny" data-burst="12,100,40" viewBox="-110 -110 220 220"></svg>
+        </div>
+        <div class="device main"><img src="assets/shot-seat.jpg" width="640" height="1280" alt=""></div>
+        <div class="chip c1"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Best 3 seats together</div>
+        <div class="chip c2"><b>99</b> H9 · centred · 11.8 m</div>
+        <div class="chip c3">Select on booking page</div>
+      </div>
+    </section>
+
+    <div class="ticker" aria-hidden="true">
+      <div>
+        <span>Free forever</span><span>No account</span><span>Works on BookMyShow and District</span><span>Nothing leaves your browser</span>
+        <span>Free forever</span><span>No account</span><span>Works on BookMyShow and District</span><span>Nothing leaves your browser</span>
+      </div>
+    </div>
+
+    <section id="about" class="about reveal">
+      <div class="aboutArt">
+        <div class="tile">
+          <div class="device tiltA" data-tilt="-13,-4"><img src="assets/shot-front.jpg" width="640" height="1280" loading="lazy" alt="Front-row seat: the screen overflows the view, score 32"></div>
+          <div class="device tiltB" data-tilt="15,6"><img src="assets/shot-hall.jpg" width="640" height="1280" loading="lazy" alt="Whole hall in 3D with seats coloured by status"></div>
+        </div>
+        <button class="play" type="button" data-demo aria-label="Open the live demo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+        </button>
+      </div>
+      <div class="aboutText">
+        <p class="label fade">About</p>
+        <h2>
+          <span class="line"><span>Know a bad seat</span></span>
+          <span class="line"><span>before you pay</span></span>
+          <span class="line"><span>for it</span></span>
+        </h2>
+        <p class="body fade">A seat map shows where a seat is, not what you see from it. 3D Seat View reads the layout already on the page and builds the hall around it, with a score, the distance to the screen, the viewing angle and the neck tilt for every seat. Front rows, far corners and seats behind a tall crowd show up at once.</p>
+        <button class="btn white small fade" type="button" data-demo>Try the demo</button>
+      </div>
+    </section>
+
+    <section id="video" class="video reveal">
+      <div class="videoHead">
+        <p class="label">Watch</p>
+        <h2>
+          <span class="line"><span>The whole thing</span></span>
+          <span class="line"><span>in one minute</span></span>
+        </h2>
+      </div>
+      <div class="player fade">
+        <video controls playsinline preload="none" poster="assets/explainer-poster.jpg">
+          <source src="assets/explainer.mp4" type="video/mp4">
+          Your browser cannot play this video. <a href="assets/explainer.mp4">Download it</a>.
+        </video>
+      </div>
+    </section>
+
+    <section id="features" class="features reveal">
+      <div class="featHead">
+        <div>
+          <p class="label">Features</p>
+          <h2>
+            <span class="line"><span>Everything the seat map</span></span>
+            <span class="line"><span>leaves out, in one panel</span></span>
+            <span class="line"><span>beside your booking</span></span>
+          </h2>
+          <div class="arrows">
+            <button type="button" data-prev aria-label="Previous feature"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+            <button type="button" data-next aria-label="Next feature" class="on"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <svg class="burst spin" data-burst="16,100,34" viewBox="-110 -110 220 220" aria-hidden="true"></svg>
+      </div>
+
+      <div class="track" tabindex="0" aria-label="Feature list">
+        <article>
+          <div><h3>View from your seat</h3><p>First-person 3D from the exact seat: how centred you are, how big the screen looks and whose head is in the way.</p></div>
+          <div class="ui"><span class="tag dark">Seat</span><span class="tag">Hall</span></div>
+        </article>
+        <article>
+          <div><h3>A score for every seat</h3><p>One number out of 100, from screen fill, centring and neck tilt. A bad seat is obvious at a glance.</p></div>
+          <div class="ui"><span class="ring">99</span><span class="tag">Sweet spot</span></div>
+        </article>
+        <article>
+          <div><h3>Best seats together</h3><p>Say how many you need. The best free run of side-by-side seats is selected on the booking page for you.</p></div>
+          <div class="ui"><span class="tag">− 3 +</span><span class="tag dark">Find the best 3</span></div>
+        </article>
+        <article>
+          <div><h3>Distances and angles</h3><p>Metres to the screen, offset from the centre line, viewing angle, row position and nearest aisle.</p></div>
+          <div class="ui"><span class="tag">11.8 m</span><span class="tag">46°</span><span class="tag">Centred</span></div>
+        </article>
+        <article>
+          <div><h3>Whole-hall view</h3><p>Orbit the theatre with seats coloured by status: available, bestseller, sold and your picks.</p></div>
+          <div class="ui"><span class="dot g"></span><span class="dot y"></span><span class="dot k"></span><span class="dot p"></span></div>
+        </article>
+        <article>
+          <div><h3>Private by design</h3><p>No account, tracking or ads. The seat map is read and drawn inside your own browser and goes nowhere.</p></div>
+          <div class="ui"><span class="tag">0 data collected</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="how" class="how reveal">
+      <div class="howHead">
+        <p class="label">How it works</p>
+        <h2>
+          <span class="line"><span>Three clicks from seat map</span></span>
+          <span class="line"><span>to the view from your seat</span></span>
+        </h2>
+      </div>
+      <ol>
+        <li class="fade"><b>01</b><h3>Open a seat layout</h3><p>Any movie on BookMyShow or District, in Chrome on a computer.</p></li>
+        <li class="fade"><b>02</b><h3>Open the panel</h3><p>Click the 3D Seat View icon. The hall appears beside the page.</p></li>
+        <li class="fade"><b>03</b><h3>Click a seat</h3><p>See the view, the score and the numbers. Then book as usual.</p></li>
+      </ol>
+    </section>
+
+    <section id="get" class="cta reveal">
+      <div class="ctaInner">
+        <svg class="curves" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M-40 420 C 300 300, 620 260, 1240 60"/>
+          <path d="M-40 620 C 380 480, 760 470, 1240 330"/>
+        </svg>
+        <h2>
+          <span class="line"><span>Sit in your seat</span></span>
+          <span class="line"><span>before you pay for it</span></span>
+        </h2>
+        <p class="body fade">Open any movie seat layout on in.bookmyshow.com or www.district.in in Chrome on a computer, click the 3D Seat View icon, then click a seat. Distances and angles are estimates built from the seat map.</p>
+        <a class="btn lav fade" href="#get" data-store data-soon="Coming soon to the Chrome Web Store">Add to Chrome, free</a>
+        <div class="trio" aria-hidden="true">
+          <svg class="burst white" data-burst="16,100,42" viewBox="-110 -110 220 220"></svg>
+          <div class="device"><img src="assets/shot-side.jpg" width="640" height="1280" loading="lazy" alt=""></div>
+          <div class="device"><img src="assets/shot-seat.jpg" width="640" height="1280" loading="lazy" alt=""></div>
+          <div class="device"><img src="assets/shot-hall.jpg" width="640" height="1280" loading="lazy" alt=""></div>
         </div>
       </div>
     </section>
 
-    <section class="features" id="how">
-      <h2>How it works</h2>
-      <div class="cards">
-        <article>
-          <span class="num">01</span>
-          <h3>Open a seat layout</h3>
-          <p>Go to the seat selection page on BookMyShow or District, the same as always.</p>
-        </article>
-        <article>
-          <span class="num">02</span>
-          <h3>Pick a seat</h3>
-          <p>The side panel opens and rebuilds the hall in 3D from the layout, then puts you in that seat.</p>
-        </article>
-        <article>
-          <span class="num">03</span>
-          <h3>Compare, then book</h3>
-          <p>Each seat gets a score out of 100. Try a few, keep the best one, and book on the site as usual.</p>
-        </article>
+    <section id="faq" class="faq reveal">
+      <div>
+        <p class="label">FAQ</p>
+        <h2><span class="line"><span>Good to know</span></span></h2>
       </div>
-      <div class="explain">
-        <div><b>Distance to screen</b><span>How far your eyes are from the screen.</span></div>
-        <div><b>Offset from centre</b><span>How far left or right of the middle you sit.</span></div>
-        <div><b>Screen fill angle</b><span>How wide the screen looks. Around 40–50° feels immersive without turning your head.</span></div>
-        <div><b>Neck tilt</b><span>How far you look up. Front rows score lower for a reason.</span></div>
+      <div class="qa">
+        <details>
+          <summary>Which seats are best in a movie theatre?</summary>
+          <p>Usually centre seats about two thirds of the way back. The score shows it for the exact hall you are booking, and "Find the best seat" picks the best free ones.</p>
+        </details>
+        <details>
+          <summary>How accurate are the distances?</summary>
+          <p>They are estimates. Booking sites do not publish hall measurements, so the hall is built from the seat map and typical multiplex dimensions. You can adjust seat width, row spacing and screen distance if you know the hall.</p>
+        </details>
+        <details>
+          <summary>Does it book or pay for anything?</summary>
+          <p>No. It only selects seats on the page, and only when you press "Find the best seat". You finish the booking yourself.</p>
+        </details>
+        <details>
+          <summary>Which sites and devices are supported?</summary>
+          <p>Movie seat-layout pages on BookMyShow and District, in Chrome on a desktop or laptop. Phones are not supported yet.</p>
+        </details>
+        <details>
+          <summary>What data does it collect?</summary>
+          <p>None. See the <a href="privacy.html">privacy policy</a>.</p>
+        </details>
       </div>
     </section>
 
-    <section class="install" id="install">
-      <h2>How to install</h2>
-      <p class="sub">It isn't on the Chrome Web Store yet, so you load it yourself. It takes about a minute.</p>
-      <ol class="steps">
-        <li><b>Download and unzip.</b> Get <a href="https://github.com/sunithvs/3d-seat-view/releases/latest/download/clens.zip"><code>clens.zip</code></a> and unzip it. You'll get a folder; keep it somewhere it won't be deleted.</li>
-        <li><b>Open the extensions page.</b> Type <code>chrome://extensions</code> in the address bar and press Enter.</li>
-        <li><b>Turn on Developer mode.</b> Switch on the toggle at the top right of the page.</li>
-        <li><b>Click "Load unpacked".</b> The button appears at the top left once Developer mode is on.</li>
-        <li><b>Pick the folder.</b> Choose the unzipped folder (the one with <code>manifest.json</code> inside).</li>
-        <li><b>Pin it.</b> Click the puzzle icon in the toolbar and pin <i>3D Seat View</i> so it's one click away.</li>
-        <li><b>Open BookMyShow or District.</b> Choose a show, go to seat selection, and pick a seat. The 3D view opens in the side panel.</li>
-      </ol>
-      <p class="note">Updating: download the new zip, replace the folder, then click the reload arrow on the extension's card in <code>chrome://extensions</code>. Works in Chrome, Edge, Brave and Arc.</p>
-      <a class="btn primary" href="https://github.com/sunithvs/3d-seat-view/releases/latest/download/clens.zip">Download extension</a>
-    </section>
-  </main>
+    <footer>
+      <a class="brand" href="#top"><img src="assets/logo.svg" width="26" height="26" alt=""><span>3D Seat View</span></a>
+      <p>An independent tool, not affiliated with or endorsed by BookMyShow, District, Zomato or any cinema chain. All trademarks belong to their owners.</p>
+      <a href="https://github.com/sunithvs/3d-seat-view">Source on GitHub</a>
+      <a href="privacy.html">Privacy policy</a>
+    </footer>
+  </div>
 
-  <footer class="foot">
-    <div>
-      <p>© 2026 Sunith VS. All rights reserved. Free to install and use for personal use; see the <a href="https://github.com/sunithvs/3d-seat-view/blob/main/LICENSE">license</a>.</p>
-      <p class="muted">Not affiliated with BookMyShow or District. The demo above is an illustration, not a real booking page.</p>
-    </div>
-    <div class="foot-links">
-      <a href="https://github.com/sunithvs/3d-seat-view" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/sunithvs/3d-seat-view/releases" target="_blank" rel="noopener">Releases</a>
-      <a href="https://github.com/sunithvs/3d-seat-view/issues" target="_blank" rel="noopener">Report an issue</a>
-    </div>
-  </footer>
+  <dialog id="demo" aria-label="Live demo">
+    <button class="close" type="button" data-close aria-label="Close demo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="device live"><iframe title="3D Seat View live demo" loading="lazy"></iframe></div>
+    <p>Live demo on sample data. Drag to look around, press Hall, or find the best seats.</p>
+  </dialog>
 
-  <script src="app.js"></script>
+  <script src="site.js" type="module"></script>
 </body>
 </html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3D Seat View</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <header>
+    <h1 id="title">3D Seat View</h1>
+    <p id="sub">Waiting for a seat layout…</p>
+  </header>
+
+  <div id="err" role="alert" hidden><span id="errText"></span><button id="errClose" aria-label="Dismiss error">×</button></div>
+
+  <section id="stage">
+    <canvas id="gl"></canvas>
+
+    <div id="modes" class="seg" role="group" aria-label="View">
+      <button id="btnSeat" class="on" title="View from the seat">Seat</button>
+      <button id="btnHall" title="Whole theatre">Hall</button>
+    </div>
+
+    <div class="tools">
+      <button id="btnGuide" class="chip" title="Guide: seat status colours and a centring grid. Off: realistic cinema">Guide</button>
+      <button id="btnReset" class="icon" title="Reset camera" aria-label="Reset camera">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+    </div>
+
+    <div id="legend" hidden>
+      <span><i style="background:#2fbf71"></i>Available</span>
+      <span><i style="background:#f5b942"></i>Bestseller</span>
+      <span><i style="background:#4a4d57"></i>Sold</span>
+      <span><i style="background:#ff9db5"></i>Picked</span>
+    </div>
+
+    <div id="tip" hidden></div>
+    <div id="empty">
+      <strong>No seat layout found</strong>
+      <span>Open a BookMyShow or District seat-selection page. If it is already open, reload it once.</span>
+    </div>
+  </section>
+
+  <main id="info" hidden>
+    <div class="hero">
+      <div id="score"><b>–</b></div>
+      <div class="heroText">
+        <div id="seatName">Pick a seat</div>
+        <div id="verdict">Click any seat to sit in it.</div>
+      </div>
+    </div>
+
+    <div id="group" hidden></div>
+
+    <dl id="metrics"></dl>
+
+    <div class="pickRow">
+      <div id="qtyBox" class="stepper" role="group" aria-label="Seats together">
+        <button id="qtyMinus" aria-label="Fewer seats">−</button>
+        <output id="qty">1</output>
+        <button id="qtyPlus" aria-label="More seats">+</button>
+      </div>
+      <button id="btnBest" class="ghost">Find the best seat</button>
+    </div>
+    <p id="pickNote" hidden></p>
+
+    <details id="calib" hidden>
+      <summary>Adjust hall estimates</summary>
+      <label><span>Seat width</span><output id="oSeatW"></output>
+        <input id="seatW" type="range" min="0.45" max="0.8" step="0.01"></label>
+      <label><span>Row spacing</span><output id="oRowPitch"></output>
+        <input id="rowPitch" type="range" min="0.85" max="1.6" step="0.05"></label>
+      <label><span>Step height per row</span><output id="oRise"></output>
+        <input id="rise" type="range" min="0" max="0.5" step="0.02"></label>
+      <label><span>Front row to screen</span><output id="oFirstRow"></output>
+        <input id="firstRow" type="range" min="0" max="10" step="0.25"></label>
+      <label><span>Screen shape</span>
+        <select id="aspect">
+          <option value="2.39">Scope 2.39:1</option>
+          <option value="1.85">Flat 1.85:1</option>
+          <option value="1.43">IMAX 1.43:1</option>
+        </select></label>
+      <button id="btnDefaults" class="ghost">Reset to defaults</button>
+    </details>
+  </main>
+
+  <footer>Distances and angles are estimates. Booking sites do not publish hall measurements.</footer>
+
+  <script type="module" src="panel.js"></script>
+</body>
+</html>
