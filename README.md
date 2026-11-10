@@ -6,6 +6,17 @@ See the view from your seat before you pay. Pick a seat on BookMyShow or Distric
 **Video (1 min):** https://youtu.be/BZO4ZHF7kJk
 **Chrome Web Store:** https://chromewebstore.google.com/detail/flckkbgpbfplbiljniohphhmaogainnl  
 
+## Features
+
+- 3D view from any seat, a score out of 100 and the numbers behind it
+- A pill on the booking page while a seat is selected, opening the panel on that seat
+- Trailer on the 3D screen (only when you press the button)
+- Compare up to three seats, value for money, and a shareable picture of your view
+- Hall types (IMAX, recliner, 4DX and more)
+- BookMyShow, District and PVR INOX
+
+See [CHANGELOG.md](CHANGELOG.md). The extension source is in [extension/](extension/).
+
 ## Install
 
 Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/flckkbgpbfplbiljniohphhmaogainnl) and press **Add to Chrome**. Then open a seat-selection page on BookMyShow or District, click the 3D Seat View icon and pick a seat.
