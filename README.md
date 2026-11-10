@@ -2,15 +2,15 @@
 
 See the view from your seat before you pay. Pick a seat on BookMyShow or District and a side panel opens next to the seat map with a 3D view from that seat, a score out of 100, and the numbers behind it: distance to the screen, offset from centre, screen fill angle, neck tilt and row.
 
-**Website:** https://seats.radr.in/  
+**Website:** https://seats.movie/  
 **Video (1 min):** https://youtu.be/BZO4ZHF7kJk
-**Download:** [3d-seat-view.zip](https://seats.radr.in/download/3d-seat-view.zip) · [install guide](https://seats.radr.in/install.html)
+**Download:** [3d-seat-view.zip](https://seats.movie/download/3d-seat-view.zip) · [install guide](https://seats.movie/install.html)
 
 ## Install
 
 The extension isn't on the Chrome Web Store yet, so you load it yourself:
 
-1. Download [`3d-seat-view.zip`](https://seats.radr.in/download/3d-seat-view.zip) and unzip it. Keep the folder somewhere it won't be deleted.
+1. Download [`3d-seat-view.zip`](https://seats.movie/download/3d-seat-view.zip) and unzip it. Keep the folder somewhere it won't be deleted.
 2. Open `chrome://extensions` in Chrome.
 3. Turn on **Developer mode** (top right).
 4. Click **Load unpacked** (top left).

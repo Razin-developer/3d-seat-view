@@ -1,0 +1,18 @@
+# Serves the website folder on seats.movie (and www) straight from Cloudflare.
+# Deploy:  npx wrangler deploy      (run inside site-worker/)
+name = "seats-movie-site"
+compatibility_date = "2026-11-01"
+workers_dev = false
+
+[assets]
+directory = "../docs"
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
+
+[[routes]]
+pattern = "seats.movie"
+custom_domain = true
+
+[[routes]]
+pattern = "www.seats.movie"
+custom_domain = true
