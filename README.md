@@ -4,11 +4,12 @@ See the view from your seat before you pay. Pick a seat on BookMyShow or Distric
 
 **Website:** https://seats.movie/  
 **Video (1 min):** https://youtu.be/BZO4ZHF7kJk
+**Chrome Web Store:** https://chromewebstore.google.com/detail/flckkbgpbfplbiljniohphhmaogainnl  
 **Download:** [3d-seat-view.zip](https://seats.movie/download/3d-seat-view.zip) · [install guide](https://seats.movie/install.html)
 
 ## Install
 
-The extension isn't on the Chrome Web Store yet, so you load it yourself:
+Easiest: install from the [Chrome Web Store](https://chromewebstore.google.com/detail/flckkbgpbfplbiljniohphhmaogainnl). To load it by hand instead:
 
 1. Download [`3d-seat-view.zip`](https://seats.movie/download/3d-seat-view.zip) and unzip it. Keep the folder somewhere it won't be deleted.
 2. Open `chrome://extensions` in Chrome.

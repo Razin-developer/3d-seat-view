@@ -245,7 +245,9 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .guideTop .lead { max-width: 36em; }
 .guideTop .actions { align-items: center; }
 .meta { color: var(--dim); font-weight: 300; font-size: 14px; }
-.guideSteps { list-style: none; margin: clamp(40px, 6vw, 72px) 0 0; padding: 0; max-width: 860px; }
+.guideTop .meta { display: block; margin-top: 16px; }
+.guideAlt { margin-top: clamp(40px, 6vw, 72px); font-size: 24px; letter-spacing: -.015em; }
+.guideSteps { list-style: none; margin: 18px 0 0; padding: 0; max-width: 860px; }
 .guideSteps li { display: grid; grid-template-columns: 64px 1fr; gap: 8px 20px; padding: 30px 0; border-top: 1px solid var(--line); }
 .guideSteps li > b { font-weight: 300; font-size: 44px; line-height: 1; letter-spacing: -.03em; color: var(--lav); }
 .guideSteps h2, .guideMore h2 { font-size: 24px; letter-spacing: -.015em; }

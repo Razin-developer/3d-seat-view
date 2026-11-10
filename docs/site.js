@@ -1,7 +1,7 @@
 import layout from './demo/fixture.js';
 
 // Paste the Chrome Web Store listing address here once the extension is published.
-const STORE_URL = '';
+const STORE_URL = 'https://chromewebstore.google.com/detail/flckkbgpbfplbiljniohphhmaogainnl';
 
 // Waitlist API (Cloudflare Worker + D1, see /waitlist in the project).
 const WAITLIST_API = 'https://seatview-waitlist.sunithvs2002.workers.dev';
