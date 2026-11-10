@@ -3,7 +3,7 @@
 See the view from your seat before you pay. Pick a seat on BookMyShow or District and a side panel opens next to the seat map with a 3D view from that seat, a score out of 100, and the numbers behind it: distance to the screen, offset from centre, screen fill angle, neck tilt and row.
 
 **Website:** https://seats.radr.in/  
-**Video (1 min):** https://seats.radr.in/assets/explainer.mp4
+**Video (1 min):** https://youtu.be/BZO4ZHF7kJk
 **Download:** [3d-seat-view.zip](https://seats.radr.in/download/3d-seat-view.zip) · [install guide](https://seats.radr.in/install.html)
 
 ## Install

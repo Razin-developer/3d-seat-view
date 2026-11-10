@@ -73,16 +73,16 @@
             Try live demo
           </button>
         </div>
-        <div class="stat fade">
-          <div>
-            <b><span data-count="99">0</span><small>/100</small></b>
-            <span>score of the best<br>seat in this hall</span>
+        <form class="heroWait fade" data-waitlist novalidate>
+          <p class="heroWaitLabel"><i></i>Mobile version coming soon</p>
+          <div class="heroWaitRow">
+            <label class="sr" for="heroEmail">Email address</label>
+            <input id="heroEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="Your email" required>
+            <button type="submit">Notify me</button>
           </div>
-          <a class="pill" href="#features" aria-label="See features">
-            <i>H8</i><i>H9</i><i>H10</i>
-            <span class="go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-          </a>
-        </div>
+          <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <p class="waitMsg" role="status"></p>
+        </form>
       </div>
 
       <!-- desktop: a working mini product. Click a seat on the map, the real 3D panel follows. -->
@@ -98,12 +98,20 @@
           </div>
           <div class="split">
             <div class="map">
-              <p class="mapTitle">Select seats <small>Friday Premiere (3D)</small></p>
-              <svg id="seatMap" role="group" aria-label="Seat map. Click a seat to see the view from it."></svg>
-              <p class="hint"><span></span>Click any seat</p>
+              <div class="mapHead">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+                <p>Friday Premiere (3D)<small>Screen 2 · Fri, 13 Nov</small></p>
+                <span class="tix" id="mapTix">3 Tickets</span>
+              </div>
+              <div class="mapTimes" aria-hidden="true"><span>11:00 AM</span><span>03:00 PM</span><span class="on">07:30 PM</span><span>11:00 PM</span></div>
+              <div class="mapBody">
+                <svg id="seatMap" role="group" aria-label="Seat map. Click a seat to see the view from it."></svg>
+                <p class="hint"><span></span>Click any seat</p>
+              </div>
               <ul class="legend" aria-hidden="true">
-                <li><i class="a"></i>Available</li><li><i class="s"></i>Sold</li><li><i class="p"></i>Your seats</li>
+                <li><i class="a"></i>Available</li><li><i class="b"></i>Bestseller</li><li><i class="s"></i>Sold</li><li><i class="p"></i>Yours</li>
               </ul>
+              <div class="mapPay" aria-hidden="true"><p id="mapPicked">Pick a seat</p><span id="mapPay">Pay</span></div>
             </div>
             <div class="side">
               <img src="assets/shot-seat.jpg" width="640" height="1280" alt="3D view from seat H9 with a score of 99">
@@ -163,10 +171,12 @@
         </h2>
       </div>
       <div class="player fade">
-        <video controls playsinline preload="none" poster="assets/explainer-poster.jpg">
-          <source src="assets/explainer.mp4" type="video/mp4">
-          Your browser cannot play this video. <a href="assets/explainer.mp4">Download it</a>.
-        </video>
+        <!-- YouTube loads only after the visitor presses play -->
+        <button class="yt" type="button" data-yt="BZO4ZHF7kJk" aria-label="Play the one-minute explainer video">
+          <img src="assets/explainer-poster.jpg" width="1280" height="720" loading="lazy" alt="">
+          <span class="ytPlay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+        </button>
+        <noscript><a href="https://youtu.be/BZO4ZHF7kJk">Watch the video on YouTube</a></noscript>
       </div>
     </section>
 
@@ -261,7 +271,7 @@
         </h2>
         <p class="body fade">Most tickets get booked on a phone. A mobile version is in the works. Leave your email and you will get one message when it is ready, nothing else.</p>
       </div>
-      <form id="waitlist" class="wait fade" novalidate>
+      <form id="waitlist" class="wait fade" data-waitlist novalidate>
         <div class="waitRow">
           <label class="sr" for="wlEmail">Email address</label>
           <input id="wlEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
@@ -274,7 +284,7 @@
         </fieldset>
         <!-- left empty by people; bots that fill every field get ignored -->
         <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <p id="wlMsg" class="waitMsg" role="status"></p>
+        <p class="waitMsg" role="status"></p>
         <p class="waitFine">Only your email and phone type are stored. See the <a href="privacy.html">privacy policy</a>.</p>
       </form>
     </section>

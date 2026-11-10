@@ -130,7 +130,7 @@ if (mapSvg && heroFrame && matchMedia('(min-width: 921px)').matches) {
   const NS = 'http://www.w3.org/2000/svg';
   const seats = layout.seats;
   const xs = seats.map((s) => s.x), ys = seats.map((s) => s.y);
-  const x0 = Math.min(...xs) - 34, x1 = Math.max(...xs) + 16, y0 = Math.min(...ys) - 16, y1 = Math.max(...ys) + 52;
+  const x0 = Math.min(...xs) - 34, x1 = Math.max(...xs) + 16, y0 = Math.min(...ys) - 50, y1 = Math.max(...ys) + 74;
   mapSvg.setAttribute('viewBox', `${x0} ${y0} ${x1 - x0} ${y1 - y0}`);
   const add = (tag, attrs, text) => {
     const el = document.createElementNS(NS, tag);
@@ -140,22 +140,33 @@ if (mapSvg && heroFrame && matchMedia('(min-width: 921px)').matches) {
     return el;
   };
   const kind = { 1: 'a', 2: 's', 4: 'b', 9: 'p' };
+  // price bands sit in the gaps between seat blocks, like a real booking page
+  const midX = (x0 + x1) / 2 + 9;
+  const BANDS = ['PREMIUM XL', 'PREMIUM', 'EXECUTIVE', 'NORMAL'];
+  (layout.headers || []).forEach((hd, i) => {
+    const price = (seats.find((s) => s.y > hd.y) || {}).price;
+    add('text', { class: 'band', x: midX, y: hd.y + 14, 'text-anchor': 'middle' }, `${BANDS[i] || 'SEATS'} · ₹${price}`);
+    add('line', { class: 'rule', x1: x0 + 26, x2: x1 - 8, y1: hd.y + 23, y2: hd.y + 23 });
+  });
   const rects = new Map();
   const rowsDone = new Set();
   for (const s of seats) {
-    if (!rowsDone.has(s.row)) { rowsDone.add(s.row); add('text', { x: x0 + 6, y: s.y + 3 }, s.row); }
+    if (!rowsDone.has(s.row)) { rowsDone.add(s.row); add('text', { x: x0 + 6, y: s.y + 4 }, s.row); }
     const r = add('rect', {
       x: s.x - 10, y: s.y - 10, width: 20, height: 20, rx: 5, 'stroke-width': 1.5,
       class: kind[s.st] || 'a', tabindex: 0, role: 'button', 'aria-label': `Row ${s.row} seat ${s.num}`,
     });
+    const tip = document.createElementNS(NS, 'title'); tip.textContent = `${s.row}${s.num} · ₹${s.price}`; r.append(tip);
     const go = () => pick(s.id);
     r.addEventListener('click', go);
     r.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     rects.set(s.id, r);
   }
-  const mid = (x0 + x1) / 2;
-  add('rect', { class: 'scr', x: mid - 150, y: y1 - 26, width: 300, height: 6, rx: 3 });
-  add('text', { x: mid, y: y1 - 6, 'text-anchor': 'middle' }, 'Screen this way');
+  // curved screen with a soft glow under it
+  const sy = y1 - 40;
+  add('path', { class: 'glow', d: `M${midX - 150} ${sy} Q${midX} ${sy - 16} ${midX + 150} ${sy} L${midX + 176} ${sy + 34} L${midX - 176} ${sy + 34} Z` });
+  add('path', { class: 'scr', d: `M${midX - 150} ${sy} Q${midX} ${sy - 16} ${midX + 150} ${sy}` });
+  add('text', { class: 'scrText', x: midX, y: sy + 22, 'text-anchor': 'middle' }, 'SCREEN THIS WAY');
 
   const api = () => { try { return heroFrame.contentWindow.__bms3d; } catch (_) { return null; } };
   let current = '';
@@ -170,6 +181,12 @@ if (mapSvg && heroFrame && matchMedia('(min-width: 921px)').matches) {
         + (s.id === a.selected ? ' on' : ''));
     }
     current = a.selected;
+    // footer of the mock booking page follows the selection
+    const mine = a.model.seats.filter((s) => s.status === 'picked');
+    const total = mine.reduce((n, s) => n + Number(s.price || 0), 0);
+    document.getElementById('mapPicked').textContent = mine.length ? `${mine.length} seat${mine.length === 1 ? '' : 's'} · ${mine.map((s) => s.row + s.num).join(', ')}` : 'Pick a seat';
+    document.getElementById('mapPay').textContent = mine.length ? `Pay ₹${total.toLocaleString('en-IN')}` : 'Pay';
+    document.getElementById('mapTix').textContent = `${Math.max(1, mine.length)} Ticket${mine.length > 1 ? 's' : ''}`;
   }
   function pick(id) {
     const a = api();
@@ -184,10 +201,9 @@ if (mapSvg && heroFrame && matchMedia('(min-width: 921px)').matches) {
   else addEventListener('load', () => setTimeout(start, 600));
 }
 
-// ---- mobile waitlist
-const wl = document.getElementById('waitlist');
-if (wl) {
-  const msg = document.getElementById('wlMsg'), input = document.getElementById('wlEmail'), btn = wl.querySelector('button');
+// ---- mobile waitlist (hero form and the full form further down share this)
+for (const wl of document.querySelectorAll('[data-waitlist]')) {
+  const msg = wl.querySelector('.waitMsg'), input = wl.querySelector('input[type=email]'), btn = wl.querySelector('button');
   const say = (text, kind) => { msg.textContent = text; msg.dataset.kind = kind || ''; };
   input.addEventListener('input', () => say(''));
   wl.addEventListener('submit', async (e) => {
@@ -198,14 +214,31 @@ if (wl) {
     try {
       const res = await fetch(WAITLIST_API + '/join', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email, platform: wl.platform.value || '', website: wl.website.value }),
+        body: JSON.stringify({ email, platform: wl.platform ? wl.platform.value : '', website: wl.website.value }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Something went wrong. Try again.');
-      wl.classList.add('done');
-      say('You are on the list. We will email you once when the mobile version is ready.', 'ok');
+      // one signup covers both forms
+      for (const f of document.querySelectorAll('[data-waitlist]')) {
+        f.classList.add('done');
+        const m = f.querySelector('.waitMsg');
+        m.textContent = f === wl || f.id === 'waitlist' ? 'You are on the list. We will email you once when the mobile version is ready.' : '';
+        m.dataset.kind = 'ok';
+      }
     } catch (err) {
       say(err instanceof TypeError ? 'Could not reach the server. Check your connection and try again.' : err.message, 'err');
     } finally { btn.disabled = false; }
+  });
+}
+
+// ---- explainer video: swap the poster for the YouTube player on click
+for (const b of document.querySelectorAll('[data-yt]')) {
+  b.addEventListener('click', () => {
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${b.dataset.yt}?autoplay=1&rel=0`;
+    f.title = '3D Seat View explainer video';
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    b.replaceWith(f);
   });
 }
