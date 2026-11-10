@@ -244,6 +244,7 @@ dialog p { color: var(--dim); font-size: 13px; font-weight: 300; margin: 0; text
 .doc h2 { font-size: 22px; margin-top: 38px; letter-spacing: -.01em; }
 .doc p, .doc li { color: var(--dim); font-weight: 300; margin-top: 12px; }
 .doc ul { padding-left: 20px; margin: 0; }
+.doc a { color: var(--lav); }
 .doc .date { font-size: 14px; }
 
 @media (max-width: 920px) {
