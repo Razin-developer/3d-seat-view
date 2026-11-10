@@ -4,7 +4,7 @@
 // Stores only the email, the chosen platform and the time. No IP address,
 // no user agent, no cookies.
 
-const ALLOWED_ORIGINS = ['https://seats.radr.in', 'http://localhost:8791', 'http://127.0.0.1:8791'];
+const ALLOWED_ORIGINS = ['https://seats.radr.in', 'https://3d-seat-view.pages.dev', 'http://localhost:8791', 'http://127.0.0.1:8791'];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 function cors(request) {
